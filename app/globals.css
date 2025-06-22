@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 174 42% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 174 42% 51%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 174 42% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 174 42% 51%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature_settings: "rlig" 1, "calt" 1;
+  }
+
+  h1 {
+    @apply text-header text-dental-dark font-bold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold text-dental-dark;
+  }
+
+  h3 {
+    @apply text-lg font-medium text-dental-dark;
+  }
+
+  p {
+    @apply text-body text-dental-dark;
+  }
+
+  .text-muted-foreground {
+    @apply text-dental-text-secondary;
+  }
+
+  .text-secondary {
+    @apply text-dental-text-secondary;
+  }
+}
+
+@layer components {
+  .dental-card {
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01];
+  }
+
+  .dental-button-primary {
+    @apply bg-dental-primary hover:bg-dental-accent text-white font-medium
+           px-4 py-2 rounded-lg transition-all duration-200
+           hover:shadow-md hover:scale-105 active:scale-95;
+  }
+
+  .dental-button-warm {
+    @apply bg-dental-warm hover:bg-dental-warm-dark text-white font-medium
+           px-4 py-2 rounded-lg transition-all duration-200
+           hover:shadow-lg hover:scale-105 active:scale-95
+           shadow-md;
+  }
+
+  .dental-button-warm-bright {
+    @apply bg-dental-warm-bright hover:bg-dental-warm-bright-hover text-white font-semibold
+           px-6 py-3 rounded-lg transition-all duration-200
+           hover:shadow-xl hover:scale-105 active:scale-95
+           shadow-lg;
+  }
+
+  .dental-button-secondary {
+    @apply bg-dental-secondary hover:bg-dental-light text-dental-dark font-medium
+           px-4 py-2 rounded-lg border border-gray-200 transition-all duration-200
+           hover:shadow-sm hover:scale-105 active:scale-95;
+  }
+
+  .dental-icon {
+    @apply text-dental-accent;
+  }
+
+  .dental-icon-warm {
+    @apply text-dental-warm;
+  }
+
+  .dental-stats-card {
+    @apply bg-gradient-to-br from-dental-light to-white border border-dental-secondary/50 rounded-xl p-6 hover:shadow-md transition-all duration-200;
+  }
+
+  .dental-stats-card-warm {
+    @apply bg-gradient-to-br from-dental-warm-100/30 to-white border border-dental-warm-200/50 rounded-xl p-6 hover:shadow-md transition-all duration-200;
+  }
+
+  /* Focus states for form inputs */
+  .input-warm-focus {
+    @apply focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0;
+  }
+
+  /* Warm accent badges */
+  .badge-warm {
+    @apply bg-dental-warm-100 text-dental-warm-700 border-dental-warm-200;
+  }
+}
