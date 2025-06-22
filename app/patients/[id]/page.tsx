@@ -48,7 +48,7 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
-        return "bg-blue-100 text-blue-800"
+        return "bg-dental-warm-100 text-dental-warm-700"
       case "completed":
         return "bg-green-100 text-green-800"
       case "cancelled":
@@ -67,7 +67,7 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
         </div>
         <Link href="/">
           <Button variant="ghost" className="gap-2 mb-4 hover:bg-dental-light transition-colors duration-200">
-            <ArrowLeft className="h-4 w-4 dental-icon" />
+            <ArrowLeft className="h-4 w-4 dental-icon-warm" />
             <span className="text-dental-dark">Back to Patients</span>
           </Button>
         </Link>
@@ -81,12 +81,14 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl flex items-center gap-2 text-dental-dark">
-                    <User className="h-6 w-6 dental-icon" />
+                    <User className="h-6 w-6 dental-icon-warm" />
                     {patient.firstName} {patient.lastName}
                   </CardTitle>
-                  <CardDescription className="text-small text-gray-600">Patient ID: {patient.id}</CardDescription>
+                  <CardDescription className="text-small text-dental-text-secondary">
+                    Patient ID: {patient.id}
+                  </CardDescription>
                 </div>
-                <Badge variant="outline" className="bg-dental-primary/10 text-dental-primary border-dental-primary/30">
+                <Badge variant="outline" className="bg-dental-warm-100 text-dental-warm-700 border-dental-warm-200">
                   Active Patient
                 </Badge>
               </div>
@@ -94,33 +96,33 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Mail className="h-4 w-4 text-dental-text-secondary" />
                   <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">{patient.email}</p>
+                    <p className="text-sm font-medium text-dental-dark">Email</p>
+                    <p className="text-sm text-dental-text-secondary">{patient.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <Phone className="h-4 w-4 text-dental-text-secondary" />
                   <div>
-                    <p className="text-sm font-medium">Phone</p>
-                    <p className="text-sm text-muted-foreground">{patient.phone}</p>
+                    <p className="text-sm font-medium text-dental-dark">Phone</p>
+                    <p className="text-sm text-dental-text-secondary">{patient.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-dental-text-secondary" />
                   <div>
-                    <p className="text-sm font-medium">Date of Birth</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium text-dental-dark">Date of Birth</p>
+                    <p className="text-sm text-dental-text-secondary">
                       {new Date(patient.dateOfBirth).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Contact className="h-4 w-4 text-muted-foreground" />
+                  <Contact className="h-4 w-4 text-dental-text-secondary" />
                   <div>
-                    <p className="text-sm font-medium">Emergency Contact</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium text-dental-dark">Emergency Contact</p>
+                    <p className="text-sm text-dental-text-secondary">
                       {patient.emergencyContact} - {patient.emergencyPhone}
                     </p>
                   </div>
@@ -128,10 +130,10 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
               </div>
               <Separator />
               <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <MapPin className="h-4 w-4 text-dental-text-secondary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Address</p>
-                  <p className="text-sm text-muted-foreground">{patient.address}</p>
+                  <p className="text-sm font-medium text-dental-dark">Address</p>
+                  <p className="text-sm text-dental-text-secondary">{patient.address}</p>
                 </div>
               </div>
             </CardContent>
@@ -166,10 +168,10 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
         <Card className="dental-card">
           <CardHeader className="bg-dental-light/50 rounded-t-xl">
             <CardTitle className="flex items-center gap-2 text-dental-dark">
-              <Calendar className="h-5 w-5 dental-icon" />
+              <Calendar className="h-5 w-5 dental-icon-warm" />
               Upcoming Appointments
             </CardTitle>
-            <CardDescription className="text-small text-gray-600">
+            <CardDescription className="text-small text-dental-text-secondary">
               {upcomingAppointments.length} scheduled appointment{upcomingAppointments.length !== 1 ? "s" : ""}
             </CardDescription>
           </CardHeader>
@@ -177,84 +179,90 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
             {upcomingAppointments.length > 0 ? (
               <div className="space-y-4">
                 {upcomingAppointments.map((appointment) => (
-                  <div key={appointment.id} className="border rounded-lg p-4">
+                  <div key={appointment.id} className="border border-dental-secondary/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-dental-text-secondary">
                         {new Date(appointment.date).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                         <Clock className="h-4 w-4" />
                         <span>{appointment.time}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                         <User className="h-4 w-4" />
                         <span>{getDentistName(appointment.dentistId)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                         <Stethoscope className="h-4 w-4" />
                         <span>{getTreatmentName(appointment.treatmentId)}</span>
                       </div>
-                      {appointment.notes && <p className="text-sm text-muted-foreground mt-2">{appointment.notes}</p>}
+                      {appointment.notes && (
+                        <p className="text-sm text-dental-text-secondary mt-2">{appointment.notes}</p>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No upcoming appointments</p>
+                <Calendar className="h-12 w-12 text-dental-text-secondary mx-auto mb-4" />
+                <p className="text-dental-text-secondary">No upcoming appointments</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Past Appointments */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+        <Card className="dental-card">
+          <CardHeader className="bg-dental-light/50 rounded-t-xl">
+            <CardTitle className="flex items-center gap-2 text-dental-dark">
+              <Clock className="h-5 w-5 dental-icon" />
               Appointment History
             </CardTitle>
-            <CardDescription>Previous appointments and treatments</CardDescription>
+            <CardDescription className="text-small text-dental-text-secondary">
+              Previous appointments and treatments
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {pastAppointments.length > 0 ? (
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {pastAppointments.map((appointment) => (
-                  <div key={appointment.id} className="border rounded-lg p-4">
+                  <div key={appointment.id} className="border border-dental-secondary/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant="outline" className={getStatusColor(appointment.status)}>
                         {appointment.status}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-dental-text-secondary">
                         {new Date(appointment.date).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                         <Clock className="h-4 w-4" />
                         <span>{appointment.time}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                         <User className="h-4 w-4" />
                         <span>{getDentistName(appointment.dentistId)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                         <Stethoscope className="h-4 w-4" />
                         <span>{getTreatmentName(appointment.treatmentId)}</span>
                       </div>
-                      {appointment.notes && <p className="text-sm text-muted-foreground mt-2">{appointment.notes}</p>}
+                      {appointment.notes && (
+                        <p className="text-sm text-dental-text-secondary mt-2">{appointment.notes}</p>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8">
-                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No appointment history</p>
+                <Clock className="h-12 w-12 text-dental-text-secondary mx-auto mb-4" />
+                <p className="text-dental-text-secondary">No appointment history</p>
               </div>
             )}
           </CardContent>
