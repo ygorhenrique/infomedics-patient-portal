@@ -2,9 +2,11 @@
 import { Appointment, Patient } from '@/lib/types';
 import { apiClient } from './apiClient';
 
-interface Dentist {
-  id: string;
-  name: string;
+interface NewAppointmentRequest {
+  patientId: string;
+  dentistId: string;
+  appointmentDateTime: string;
+  treatmentId: string;
 }
 
 export interface PatientAppointment {
@@ -39,6 +41,18 @@ export const appointmentsClient = {
       return response;
     } catch (error) {
       console.error(`Error fetching appointments for patient ${patientId}:`, error);
+      throw error;
+    }
+  },
+
+  async scheduleAppointment(appointmentRequest: NewAppointmentRequest): Promise<Appointment> {
+    try {
+      const url = `http://localhost:5297/appointments`;
+      const response = await apiClient.post<Appointment, NewAppointmentRequest>(url, appointmentRequest);
+
+      return response;
+    } catch (error) {
+      console.error(`Error scheduling appointment:`, error);
       throw error;
     }
   },
