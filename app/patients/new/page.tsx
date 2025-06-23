@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
 import type { NewPatientRequest } from "@/lib/api"
+import { toast } from "@/hooks/use-toast"
 
 // Supported image types and max file size
 const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
@@ -71,7 +72,15 @@ export default function NewPatientPage() {
       router.push("/")
     } catch (error) {
       console.error("Error creating patient:", error)
-      // You might want to show an error toast here
+
+      // Extract error message from the error object
+      const errorMessage = error instanceof Error ? error.message : "Failed to create patient. Please try again."
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
