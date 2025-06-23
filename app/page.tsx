@@ -2,17 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientCard } from "@/components/patient-card"
-import { MobileFilterDropdown } from "@/components/mobile-filter-dropdown"
-import { Search, Filter, UserPlus, Users, Stethoscope, Clock, Calendar } from "lucide-react"
+import { UserPlus, Users, Stethoscope, Clock, Calendar } from "lucide-react"
 import Link from "next/link"
-import { Appointment, appointmentsClient } from "@/lib/api/clients/appointmentsClient"
-import { dentistsClient, Dentist } from "@/lib/api/clients/dentistsClient"
-import { Treatment, treatmentsClient } from "@/lib/api/clients/treatmentsClient"
+import { appointmentsClient, PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
 import { Stats, statsClient } from "@/lib/api/clients/statsClient"
 import { Patient } from "@/lib/types"
@@ -20,29 +14,19 @@ import { Patient } from "@/lib/types"
 const PATIENTS_PER_PAGE = 6
 
 export default function HomePage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterDate, setFilterDate] = useState("")
-  const [filterDentist, setFilterDentist] = useState("all")
-  const [filterTreatment, setFilterTreatment] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
 
   const [patientsData, setPatientsData] = useState<Patient[]>([])
-  const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([])
-  const [dentistsData, setDentistsData] = useState<Dentist[]>([])
-  const [treatmentsData, setTreatmentsData] = useState<Treatment[]>([])
+  const [appointmentsData, setAppointmentsData] = useState<PatientAppointment[]>([])
   const [statsData, setStatsData] = useState<Stats | null>(null)
 
   const loadData = async () => {
-    const dentists = await dentistsClient.getAllDentists()
     const appointments = await appointmentsClient.getAllAppointments()
-    const treatments = await treatmentsClient.getAllTreatments()
     const patients = await patientsClient.getAllPatients()
     const stats = await statsClient.getStats()
 
     setPatientsData(patients)
     setAppointmentsData(appointments)
-    setDentistsData(dentists)
-    setTreatmentsData(treatments)
     setStatsData(stats)
   }
 
@@ -54,10 +38,6 @@ export default function HomePage() {
   const paginatedPatients = patientsData.slice((currentPage - 1) * PATIENTS_PER_PAGE, currentPage * PATIENTS_PER_PAGE)
 
   const clearFilters = () => {
-    setSearchTerm("")
-    setFilterDate("")
-    setFilterDentist("all")
-    setFilterTreatment("all")
     setCurrentPage(1)
   }
 
