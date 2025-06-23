@@ -1,21 +1,20 @@
-// lib/api/clients/stockClient.ts
-import { apiClient } from './apiClient';
+import { baseApiClient } from "./baseApiClient"
+import { API_ENDPOINTS } from "../config"
+import type { Treatment, CreateTreatmentRequest } from "../types/treatments"
+import type { RequestOptions } from "../types/common"
 
-export interface Treatment {
-  id: string;
-  name: string;
+export class TreatmentsClient {
+  async getAll(options?: RequestOptions): Promise<Treatment[]> {
+    return baseApiClient.get<Treatment[]>(API_ENDPOINTS.treatments, options)
+  }
+
+  async getById(id: string, options?: RequestOptions): Promise<Treatment> {
+    return baseApiClient.get<Treatment>(`${API_ENDPOINTS.treatments}/${id}`, options)
+  }
+
+  async create(data: CreateTreatmentRequest, options?: RequestOptions): Promise<Treatment> {
+    return baseApiClient.post<Treatment, CreateTreatmentRequest>(API_ENDPOINTS.treatments, data, options)
+  }
 }
 
-export const treatmentsClient = {
-  async getAllTreatments(): Promise<Treatment[]> {
-    try {
-      const url = `http://localhost:5297/treatments`;
-      const response = await apiClient.get<Treatment[]>(url);
-
-      return response;
-    } catch (error) {
-      console.error(`Error fetching all treatments:`, error);
-      throw error;
-    }
-  },
-};
+export const treatmentsClient = new TreatmentsClient()

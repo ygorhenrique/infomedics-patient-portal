@@ -1,44 +1,216 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientCard } from "@/components/patient-card"
-import { UserPlus, Users, Stethoscope, Clock, Calendar } from "lucide-react"
+import { UserPlus, Users, Stethoscope, Clock, Calendar, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { appointmentsClient, PatientAppointment } from "@/lib/api/clients/appointmentsClient"
+import { appointmentsClient, type PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
-import { Stats, statsClient } from "@/lib/api/clients/statsClient"
-import { Patient } from "@/lib/types"
+import { type Stats, statsClient } from "@/lib/api/clients/statsClient"
+import type { Patient } from "@/lib/types"
 
 const PATIENTS_PER_PAGE = 6
 
-export default function HomePage() {
-  const [currentPage, setCurrentPage] = useState(1)
+// Custom hook for data fetching
+function usePatientManagementData() {
+  const [data, setData] = useState<{
+    patients: Patient[]
+    appointments: PatientAppointment[]
+    stats: Stats | null
+  }>({
+    patients: [],
+    appointments: [],
+    stats: null,
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const [patientsData, setPatientsData] = useState<Patient[]>([])
-  const [appointmentsData, setAppointmentsData] = useState<PatientAppointment[]>([])
-  const [statsData, setStatsData] = useState<Stats | null>(null)
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  const loadData = async () => {
-    const appointments = await appointmentsClient.getAllAppointments()
-    const patients = await patientsClient.getAllPatients()
-    const stats = await statsClient.getStats()
+      const [appointments, patients, stats] = await Promise.all([
+        appointmentsClient.getAllAppointments(),
+        patientsClient.getAllPatients(),
+        statsClient.getStats(),
+      ])
 
-    setPatientsData(patients)
-    setAppointmentsData(appointments)
-    setStatsData(stats)
-  }
-
-  useEffect(() => {
-    loadData()
+      setData({ patients, appointments, stats })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load data")
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const totalPages = Math.ceil(patientsData.length / PATIENTS_PER_PAGE)
-  const paginatedPatients = patientsData.slice((currentPage - 1) * PATIENTS_PER_PAGE, currentPage * PATIENTS_PER_PAGE)
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
-  const clearFilters = () => {
+  return { ...data, loading, error, refetch: fetchData }
+}
+
+// Stats card component
+interface StatsCardProps {
+  title: string
+  value: number
+  icon: React.ReactNode
+  className?: string
+}
+
+function StatsCard({ title, value, icon, className = "" }: StatsCardProps) {
+  return (
+    <Card className={`p-4 sm:p-6 hover:shadow-md transition-all duration-200 ${className}`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
+        <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="text-2xl sm:text-3xl font-bold text-dental-warm">{value}</div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Pagination component
+interface PaginationProps {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  if (totalPages <= 1) return null
+
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <Button
+        variant="outline"
+        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
+        className="text-small-mobile sm:text-sm"
+      >
+        Previous
+      </Button>
+
+      <div className="flex items-center gap-1">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <Button
+            key={page}
+            variant={currentPage === page ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPageChange(page)}
+            className={`text-small-mobile sm:text-sm ${
+              currentPage === page ? "bg-dental-warm hover:bg-dental-warm-dark text-white" : ""
+            }`}
+          >
+            {page}
+          </Button>
+        ))}
+      </div>
+
+      <Button
+        variant="outline"
+        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages}
+        className="text-small-mobile sm:text-sm"
+      >
+        Next
+      </Button>
+    </div>
+  )
+}
+
+// Empty state component
+function EmptyState() {
+  return (
+    <div className="text-center py-8 sm:py-12">
+      <Users className="h-10 w-10 sm:h-12 sm:w-12 text-dental-text-secondary mx-auto mb-4" />
+      <h3 className="text-body-mobile sm:text-lg font-semibold mb-2">No patients found</h3>
+      <p className="text-small-mobile sm:text-base text-dental-text-secondary mb-4">
+        Get started by adding your first patient
+      </p>
+      <Link href="/patients/new">
+        <Button className="dental-button-warm-bright text-small-mobile sm:text-sm">Add First Patient</Button>
+      </Link>
+    </div>
+  )
+}
+
+// Loading state component
+function LoadingState() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="flex items-center gap-2">
+        <Loader2 className="h-6 w-6 animate-spin text-dental-warm" />
+        <span className="text-dental-text-secondary">Loading patients...</span>
+      </div>
+    </div>
+  )
+}
+
+// Error state component
+interface ErrorStateProps {
+  error: string
+  onRetry: () => void
+}
+
+function ErrorState({ error, onRetry }: ErrorStateProps) {
+  return (
+    <div className="text-center py-8 sm:py-12">
+      <div className="text-red-500 mb-4">
+        <h3 className="text-body-mobile sm:text-lg font-semibold mb-2">Error loading data</h3>
+        <p className="text-small-mobile sm:text-base">{error}</p>
+      </div>
+      <Button onClick={onRetry} variant="outline">
+        Try Again
+      </Button>
+    </div>
+  )
+}
+
+export default function HomePage() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const { patients, appointments, stats, loading, error, refetch } = usePatientManagementData()
+
+  // Memoized calculations
+  const { totalPages, paginatedPatients } = useMemo(() => {
+    const totalPages = Math.ceil(patients.length / PATIENTS_PER_PAGE)
+    const startIndex = (currentPage - 1) * PATIENTS_PER_PAGE
+    const endIndex = startIndex + PATIENTS_PER_PAGE
+    const paginatedPatients = patients.slice(startIndex, endIndex)
+
+    return { totalPages, paginatedPatients }
+  }, [patients, currentPage])
+
+  // Reset to first page when patients change
+  useEffect(() => {
     setCurrentPage(1)
+  }, [patients.length])
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page)
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <LoadingState />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <ErrorState error={error} onRetry={refetch} />
+      </div>
+    )
   }
 
   return (
@@ -76,7 +248,7 @@ export default function HomePage() {
       </div>
 
       <div className="container mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-        {/* Mobile Title (shown below sticky header) */}
+        {/* Mobile Title */}
         <div className="sm:hidden mb-4">
           <h1 className="text-header-mobile text-dental-dark font-bold">Patient Management</h1>
           <p className="text-small-mobile text-dental-text-secondary font-medium mt-1">
@@ -84,127 +256,55 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Stats */}
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-gradient-to-br from-dental-warm-100/30 to-white border border-dental-warm-200/50 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
-              <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">
-                Total Patients
-              </CardTitle>
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-dental-warm" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="text-2xl sm:text-3xl font-bold text-dental-warm">
-                {statsData?.totalPatients || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="dental-stats-card p-4 sm:p-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
-              <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">
-                Scheduled Appointments
-              </CardTitle>
-              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-dental-accent" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="text-2xl sm:text-3xl font-bold text-dental-primary">
-                {statsData?.totalUpcomingAppointments || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-[#A3BFFA]/30 to-white border border-[#A3BFFA]/50 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
-              <CardTitle className="text-small-mobile sm:text-small font-semibold text-[#4A4A4A]">
-                Today's Appointments
-              </CardTitle>
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-[#4A4A4A]" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="text-2xl sm:text-3xl font-bold text-[#4A4A4A]">
-                {statsData?.totalAppointmentsToday || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="dental-stats-card p-4 sm:p-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
-              <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">
-                Active Dentists
-              </CardTitle>
-              <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-dental-accent" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="text-2xl sm:text-3xl font-bold text-dental-primary">
-                {statsData?.totalDentists || 0}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
+          <StatsCard
+            title="Total Patients"
+            value={stats?.totalPatients || 0}
+            icon={<Users className="h-4 w-4 sm:h-5 sm:w-5 text-dental-warm" />}
+            className="bg-gradient-to-br from-dental-warm-100/30 to-white border border-dental-warm-200/50 rounded-xl"
+          />
+          <StatsCard
+            title="Scheduled Appointments"
+            value={stats?.totalUpcomingAppointments || 0}
+            icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-dental-accent" />}
+            className="dental-stats-card"
+          />
+          <StatsCard
+            title="Today's Appointments"
+            value={stats?.totalAppointmentsToday || 0}
+            icon={<Clock className="h-4 w-4 sm:h-5 sm:w-5 text-[#4A4A4A]" />}
+            className="bg-gradient-to-br from-[#A3BFFA]/30 to-white border border-[#A3BFFA]/50 rounded-xl"
+          />
+          <StatsCard
+            title="Active Dentists"
+            value={stats?.totalDentists || 0}
+            icon={<Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-dental-accent" />}
+            className="dental-stats-card"
+          />
         </div>
 
-        {/* Results */}
+        {/* Results Summary */}
         <div className="mb-4 sm:mb-6">
           <p className="text-small-mobile sm:text-sm text-dental-text-secondary">
-            Showing {paginatedPatients.length} of {patientsData.length} patients
+            Showing {paginatedPatients.length} of {patients.length} patients
           </p>
         </div>
 
         {/* Patient Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {paginatedPatients.map((patient) => (
-            <PatientCard key={patient.id} patient={patient} appointments={appointmentsData} />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="text-small-mobile sm:text-sm"
-            >
-              Previous
-            </Button>
-
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                  className={`text-small-mobile sm:text-sm ${
-                    currentPage === page ? "bg-dental-warm hover:bg-dental-warm-dark text-white" : ""
-                  }`}
-                >
-                  {page}
-                </Button>
+        {patients.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              {paginatedPatients.map((patient) => (
+                <PatientCard key={patient.id} patient={patient} appointments={appointments} />
               ))}
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="text-small-mobile sm:text-sm"
-            >
-              Next
-            </Button>
-          </div>
-        )}
-
-        {/* No results */}
-        {patientsData.length === 0 && (
-          <div className="text-center py-8 sm:py-12">
-            <Users className="h-10 w-10 sm:h-12 sm:w-12 text-dental-text-secondary mx-auto mb-4" />
-            <h3 className="text-body-mobile sm:text-lg font-semibold mb-2">No patients found</h3>
-            <p className="text-small-mobile sm:text-base text-dental-text-secondary mb-4">
-              Try adjusting your search terms or filters
-            </p>
-            <Button className="dental-button-warm-bright text-small-mobile sm:text-sm" onClick={clearFilters}>
-              Clear all filters
-            </Button>
-          </div>
+            {/* Pagination */}
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+          </>
         )}
       </div>
     </div>

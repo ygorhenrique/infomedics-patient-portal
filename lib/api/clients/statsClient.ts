@@ -1,24 +1,12 @@
-// lib/api/clients/stockClient.ts
-import { apiClient } from './apiClient';
+import { baseApiClient } from "./baseApiClient"
+import { API_ENDPOINTS } from "../config"
+import type { DashboardStats } from "../types/stats"
+import type { RequestOptions } from "../types/common"
 
-export interface Stats {
-  totalPatients: number;
-  totalDentists: number;
-  totalTreatments: number;
-  totalUpcomingAppointments: number;
-  totalAppointmentsToday: number;
+export class StatsClient {
+  async getDashboardStats(options?: RequestOptions): Promise<DashboardStats> {
+    return baseApiClient.get<DashboardStats>(API_ENDPOINTS.stats, options)
+  }
 }
 
-export const statsClient = {
-  async getStats(): Promise<Stats> {
-    try {
-      const url = `http://localhost:5297/stats`;
-      const response = await apiClient.get<Stats>(url);
-
-      return response;
-    } catch (error) {
-      console.error(`Error fetching stast:`, error);
-      throw error;
-    }
-  },
-};
+export const statsClient = new StatsClient()
