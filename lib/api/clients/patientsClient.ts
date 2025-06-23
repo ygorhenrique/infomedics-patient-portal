@@ -1,18 +1,5 @@
-// lib/api/clients/stockClient.ts
-import type { Patient } from "@/lib/types"
+import type { Patient, NewPatientRequest } from "../types/patients"
 import { apiClient } from "./apiClient"
-
-export interface PhotoData {
-  base64: string
-  contentType: string
-  fileName: string
-}
-
-export interface NewPatientRequest {
-  fullName: string
-  address: string
-  photo: PhotoData | null // Include content type and metadata
-}
 
 export const patientsClient = {
   async addPatient(patientRequest: NewPatientRequest): Promise<Patient> {

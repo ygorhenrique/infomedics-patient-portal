@@ -1,21 +1,16 @@
-// lib/api/clients/stockClient.ts
-import { apiClient } from './apiClient';
-
-export interface Dentist {
-  id: string;
-  name: string;
-}
+import type { Dentist } from "../types/dentists"
+import { apiClient } from "./apiClient"
 
 export const dentistsClient = {
   async getAllDentists(): Promise<Dentist[]> {
     try {
-      const url = `http://localhost:5297/dentists`;
-      const response = await apiClient.get<Dentist[]>(url);
+      const url = `http://localhost:5297/dentists`
+      const response = await apiClient.get<Dentist[]>(url)
 
-      return response;
+      return response
     } catch (error) {
-      console.error(`Error fetching all dentists:`, error);
-      throw error;
+      console.error(`Error fetching all dentists:`, error)
+      throw error
     }
   },
-};
+}

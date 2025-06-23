@@ -1,24 +1,16 @@
-// lib/api/clients/stockClient.ts
-import { apiClient } from './apiClient';
-
-export interface Stats {
-  totalPatients: number;
-  totalDentists: number;
-  totalTreatments: number;
-  totalUpcomingAppointments: number;
-  totalAppointmentsToday: number;
-}
+import type { Stats } from "../types/stats"
+import { apiClient } from "./apiClient"
 
 export const statsClient = {
   async getStats(): Promise<Stats> {
     try {
-      const url = `http://localhost:5297/stats`;
-      const response = await apiClient.get<Stats>(url);
+      const url = `http://localhost:5297/stats`
+      const response = await apiClient.get<Stats>(url)
 
-      return response;
+      return response
     } catch (error) {
-      console.error(`Error fetching stast:`, error);
-      throw error;
+      console.error(`Error fetching stats:`, error)
+      throw error
     }
   },
-};
+}

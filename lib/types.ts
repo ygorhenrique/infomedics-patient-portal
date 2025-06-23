@@ -18,13 +18,6 @@ export interface Dentist {
   specialization: string
 }
 
-// export interface Appointment {
-//   id: string
-//   patientId: string
-//   dentistId: string
-//   treatmentId: string
-//   date: string
-//   time: string
-//   status: "scheduled" | "completed" | "cancelled"
-//   notes?: string
-// }
+export type { Stats } from "./api/types/stats"
+
+// Keep any additional app-specific types here
