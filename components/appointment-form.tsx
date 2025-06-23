@@ -38,7 +38,7 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
   })
   const [isLoading, setIsLoading] = useState(false)
   const [dentists, setDentists] = useState<Array<{ id: string; name: string }>>([])
-  const [treatments, setTreatments] = useState<Array<{ id: string; name: string }>>([])
+  const [treatments, setTreatments] = useState<Array<{ id: string; name: string; durationMins: number }>>([])
   const [isDentistsLoading, setIsDentistsLoading] = useState(false)
   const [isTreatmentsLoading, setIsTreatmentsLoading] = useState(false)
 
@@ -204,7 +204,10 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 {!isTreatmentsLoading &&
                   treatments.map((treatment) => (
                     <SelectItem key={treatment.id} value={treatment.id}>
-                      {treatment.name}
+                      <div className="flex items-center justify-between w-full">
+                        <span>{treatment.name}</span>
+                        <span className="text-xs text-dental-text-secondary ml-2">{treatment.durationMins} min</span>
+                      </div>
                     </SelectItem>
                   ))}
               </SelectContent>

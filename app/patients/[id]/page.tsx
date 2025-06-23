@@ -20,7 +20,7 @@ import { getPatientPhotoUrl } from "@/lib/utils"
 interface PageData {
   patient: Patient | null
   appointments: Appointment[]
-  treatments: { id: string; name: string }[]
+  treatments: { id: string; name: string; durationMins: number }[]
   dentists: { id: string; name: string }[]
 }
 
@@ -97,7 +97,9 @@ export default function PatientDetailPage() {
 
   const getTreatmentName = useCallback(
     (treatmentId: string) => {
-      return data!.treatments.find((t) => t.id === treatmentId)?.name || "Unknown"
+      const treatment = data!.treatments.find((t) => t.id === treatmentId)
+      if (!treatment) return "Unknown"
+      return `${treatment.name} (${treatment.durationMins} min)`
     },
     [data],
   )
