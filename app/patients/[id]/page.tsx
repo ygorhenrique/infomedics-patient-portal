@@ -206,11 +206,6 @@ export default function PatientDetailPage() {
                     <CardDescription className="text-small text-dental-text-secondary">
                       Patient ID: {data.patient.id}
                     </CardDescription>
-                    {data.patient.photo && (
-                      <CardDescription className="text-xs text-dental-text-secondary mt-1">
-                        Photo: {data.patient.photo.fileName} ({data.patient.photo.contentType})
-                      </CardDescription>
-                    )}
                   </div>
                 </div>
                 <Badge variant="outline" className="bg-dental-warm-100 text-dental-warm-700 border-dental-warm-200">
