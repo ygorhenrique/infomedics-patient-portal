@@ -18,27 +18,27 @@ This project is a patient management portal designed for modern healthcare workf
 
 Install pnpm globally if you don't have it:
 
-```bash
+\`\`\`bash
 npm install -g pnpm
-```
+\`\`\`
 
 ## 📦 Installation
 
 Clone the repository and install dependencies:
 
-```bash
+\`\`\`bash
 git clone https://github.com/ygorhenriquee/infomedics-patient-portal.git
 cd infomedics-patient-portal
 pnpm install
-```
+\`\`\`
 
 ## 🧑‍💻 Running the Development Server
 
 Start the app in development mode:
 
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
 
@@ -46,25 +46,25 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 
 To create an optimized production build:
 
-```bash
+\`\`\`bash
 pnpm build
-```
+\`\`\`
 
 ## 🚦 Running the Production Server
 
 After building, you can start the production server:
 
-```bash
+\`\`\`bash
 pnpm start
-```
+\`\`\`
 
 ## 🧹 Linting
 
 To check for linting issues:
 
-```bash
+\`\`\`bash
 pnpm lint
-```
+\`\`\`
 
 ## 🧰 Tech Stack & Configuration
 
