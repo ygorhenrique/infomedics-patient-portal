@@ -1,8 +1,14 @@
+export interface PhotoData {
+  base64: string
+  contentType: string
+  fileName: string
+}
+
 export interface Patient {
   id: string
   fullName: string
   address: string
-  photo?: string // File object for the uploaded photo
+  photo?: PhotoData | null // Updated to match backend structure
   createdAtUtc: string
 }
 

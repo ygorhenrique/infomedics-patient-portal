@@ -15,6 +15,7 @@ import type { Patient } from "@/lib/types"
 import { appointmentsClient, type PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 import { dentistsClient } from "@/lib/api/clients/dentistsClient"
+import { getPatientPhotoUrl } from "@/lib/utils"
 
 interface PageData {
   patient: Patient | null
@@ -163,6 +164,8 @@ export default function PatientDetailPage() {
     )
   }
 
+  const photoUrl = getPatientPhotoUrl(data.patient.photo)
+
   return (
     <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-4xl">
       {/* Header */}
@@ -185,9 +188,9 @@ export default function PatientDetailPage() {
             <CardHeader className="bg-dental-light/50 rounded-t-xl">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-4 flex-1">
-                  {data.patient.photo ? (
+                  {photoUrl ? (
                     <img
-                      src={data.patient.photo || "/placeholder.svg"}
+                      src={photoUrl || "/placeholder.svg"}
                       alt={data.patient.fullName}
                       className="w-16 h-16 rounded-full object-cover border-2 border-dental-secondary"
                     />
@@ -203,6 +206,11 @@ export default function PatientDetailPage() {
                     <CardDescription className="text-small text-dental-text-secondary">
                       Patient ID: {data.patient.id}
                     </CardDescription>
+                    {data.patient.photo && (
+                      <CardDescription className="text-xs text-dental-text-secondary mt-1">
+                        Photo: {data.patient.photo.fileName} ({data.patient.photo.contentType})
+                      </CardDescription>
+                    )}
                   </div>
                 </div>
                 <Badge variant="outline" className="bg-dental-warm-100 text-dental-warm-700 border-dental-warm-200">

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, User } from "lucide-react"
 import Link from "next/link"
+import { getPatientPhotoUrl } from "@/lib/utils"
 
 interface PatientCardProps {
   patient: Patient
@@ -12,14 +13,15 @@ interface PatientCardProps {
 
 export function PatientCard({ patient, appointments }: PatientCardProps) {
   const upcomingAppointments = appointments.filter((apt) => apt.patientId === patient.id && apt.status === "scheduled")
+  const photoUrl = getPatientPhotoUrl(patient.photo)
 
   return (
     <Card className="dental-card h-full group">
       <CardHeader className="pb-2 sm:pb-3 p-4 sm:p-6">
         <div className="flex items-center gap-3 mb-2">
-          {patient.photo ? (
+          {photoUrl ? (
             <img
-              src={patient.photo || "/placeholder.svg"}
+              src={photoUrl || "/placeholder.svg"}
               alt={patient.fullName}
               className="w-12 h-12 rounded-full object-cover border-2 border-dental-secondary"
             />
