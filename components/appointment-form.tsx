@@ -80,7 +80,6 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
     setIsLoading(true)
 
     try {
-      // Combine date and time into appointmentDateTime format
       const appointmentDateTime = `${formData.date}T${formData.time}:00`
 
       const appointmentRequest = {
