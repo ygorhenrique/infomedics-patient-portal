@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,9 @@ import { ArrowLeft, User, MapPin, Calendar, Clock, Stethoscope } from "lucide-re
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
+import { patientsClient } from "@/lib/api/clients/patientsClient"
+import { Patient } from "@/lib/types"
+import { appointmentsClient, PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 
 interface PatientDetailPageProps {
   params: {
@@ -20,14 +23,22 @@ interface PatientDetailPageProps {
 
 export default function PatientDetailPage({ params }: PatientDetailPageProps) {
   const [refreshKey, setRefreshKey] = useState(0)
+  const [patient, setPatient] = useState<Patient | null>(null)
+  const [patientAppointments, setPatientAppointments] = useState<PatientAppointment[]>([])
 
-  const patient = mockPatients.find((p) => p.id === params.id)
+  const loadData = async () => {
 
-  if (!patient) {
-    notFound()
+    const patient = await patientsClient.getPatientById(params.id)
+    const patientAppointments = await appointmentsClient.getAppointmentsByPatientId(params.id)
+
+    setPatient(patient)
+    setPatientAppointments(patientAppointments)
   }
 
-  const patientAppointments = mockAppointments.filter((apt) => apt.patientId === patient.id)
+  
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const upcomingAppointments = patientAppointments
     .filter((apt) => apt.status === "scheduled" && new Date(apt.date) >= new Date())
@@ -58,7 +69,7 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
     }
   }
 
-  return (
+  return patient !== null && (
     <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-4xl">
       {/* Header */}
       <div className="mb-6 px-2 sm:px-0">
