@@ -104,10 +104,9 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
       setOpen(false)
       onAppointmentCreated?.()
     } catch (error) {
-      console.error("Error scheduling appointment:", error)
       toast({
         title: "Error",
-        description: "Failed to schedule appointment. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to schedule appointment. Please try again.",
         variant: "destructive",
       })
     } finally {
