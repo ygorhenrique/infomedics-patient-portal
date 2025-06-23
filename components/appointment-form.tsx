@@ -181,15 +181,7 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 <SelectValue placeholder="Select a dentist" />
               </SelectTrigger>
               <SelectContent>
-                {isDentistsLoading ? (
-                  <SelectItem value="" disabled>
-                    Loading dentists...
-                  </SelectItem>
-                ) : dentists.length === 0 ? (
-                  <SelectItem value="" disabled>
-                    No dentists available
-                  </SelectItem>
-                ) : (
+                {!isDentistsLoading && (
                   dentists.map((dentist) => (
                     <SelectItem key={dentist.id} value={dentist.id}>
                       {dentist.name}
@@ -213,20 +205,12 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 <SelectValue placeholder="Select a treatment" />
               </SelectTrigger>
               <SelectContent>
-                {isTreatmentsLoading ? (
-                  <SelectItem value="" disabled>
-                    Loading treatments...
-                  </SelectItem>
-                ) : treatments.length === 0 ? (
-                  <SelectItem value="" disabled>
-                    No treatments available
-                  </SelectItem>
-                ) : (
+                {!isTreatmentsLoading && 
                   treatments.map((treatment) => (
                     <SelectItem key={treatment.id} value={treatment.id}>
                       {treatment.name}
                     </SelectItem>
-                  ))
+                  )
                 )}
               </SelectContent>
             </Select>
