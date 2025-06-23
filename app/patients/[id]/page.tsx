@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { AppointmentForm } from "@/components/appointment-form"
-import { mockDentists } from "@/lib/mock-data"
 import { ArrowLeft, User, MapPin, Calendar, Clock, Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -15,6 +14,7 @@ import { patientsClient } from "@/lib/api/clients/patientsClient"
 import type { Patient } from "@/lib/types"
 import { appointmentsClient, type PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
+import { dentistsClient } from "@/lib/api/clients/dentistsClient"
 
 export default function PatientDetailPage() {
   const params = useParams<{ id: string }>()
@@ -23,21 +23,24 @@ export default function PatientDetailPage() {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [patientAppointments, setPatientAppointments] = useState<PatientAppointment[]>([])
   const [treatments, setTreatments] = useState<{ id: string; name: string }[]>([])
+  const [dentists, setDentists] = useState<{ id: string; name: string }[]>([])
 
   const loadData = async () => {
     if (!params.id) {
       throw new Error("Patient ID is required")
     }
 
-    const [patient, patientAppointments, treatments] = await Promise.all([
+    const [patient, patientAppointments, treatments, dentists] = await Promise.all([
       patientsClient.getPatientById(params.id),
       appointmentsClient.getAppointmentsByPatientId(params.id),
       treatmentsClient.getAllTreatments(),
+      dentistsClient.getAllDentists(),
     ])
 
     setPatient(patient)
     setPatientAppointments(patientAppointments)
     setTreatments(treatments)
+    setDentists(dentists)
   }
 
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function PatientDetailPage() {
     })
 
   const getDentistName = (dentistId: string) => {
-    return mockDentists.find((d) => d.id === dentistId)?.name || "Unknown"
+    return dentists.find((d) => d.id === dentistId)?.name || "Unknown"
   }
 
   const getTreatmentName = (treatmentId: string) => {
