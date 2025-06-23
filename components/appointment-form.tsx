@@ -6,7 +6,6 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
@@ -36,7 +35,6 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
     time: "",
     dentistId: "",
     treatmentId: "",
-    notes: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [dentists, setDentists] = useState<Array<{ id: string; name: string }>>([])
@@ -102,7 +100,6 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
         time: "",
         dentistId: "",
         treatmentId: "",
-        notes: "",
       })
       setOpen(false)
       onAppointmentCreated?.()
@@ -181,13 +178,12 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 <SelectValue placeholder="Select a dentist" />
               </SelectTrigger>
               <SelectContent>
-                {!isDentistsLoading && (
+                {!isDentistsLoading &&
                   dentists.map((dentist) => (
                     <SelectItem key={dentist.id} value={dentist.id}>
                       {dentist.name}
                     </SelectItem>
-                  ))
-                )}
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -205,30 +201,14 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 <SelectValue placeholder="Select a treatment" />
               </SelectTrigger>
               <SelectContent>
-                {!isTreatmentsLoading && 
+                {!isTreatmentsLoading &&
                   treatments.map((treatment) => (
                     <SelectItem key={treatment.id} value={treatment.id}>
                       {treatment.name}
                     </SelectItem>
-                  )
-                )}
+                  ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-small font-medium text-dental-dark">
-              Notes (Optional)
-            </Label>
-            <Textarea
-              id="notes"
-              placeholder="Any additional notes for this appointment..."
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-              rows={3}
-              disabled={isLoading}
-            />
           </div>
 
           <DialogFooter>
