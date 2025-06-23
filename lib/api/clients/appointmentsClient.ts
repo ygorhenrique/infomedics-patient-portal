@@ -2,7 +2,6 @@
 import { apiClient } from './apiClient';
 
 export interface Appointment {
-  id: string
   patientId: string
   dentistId: string
   treatmentId: string
@@ -27,10 +26,10 @@ export interface PatientAppointment {
 }
 
 export const appointmentsClient = {
-  async getAllAppointments(): Promise<Appointment[]> {
+  async getAllAppointments(): Promise<PatientAppointment[]> {
     try {
       const url = `http://localhost:5297/appointments`;
-      const response = await apiClient.get<Appointment[]>(url);
+      const response = await apiClient.get<PatientAppointment[]>(url);
 
       return response;
     } catch (error) {

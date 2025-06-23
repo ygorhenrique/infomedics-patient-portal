@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, User } from "lucide-react"
 import Link from "next/link"
 import { getPatientPhotoUrl } from "@/lib/utils"
-import { Appointment } from "@/lib/api/clients/appointmentsClient"
+import { PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 
 interface PatientCardProps {
   patient: Patient
-  appointments: Appointment[]
+  appointments: PatientAppointment[]
 }
 
 export function PatientCard({ patient, appointments }: PatientCardProps) {
@@ -60,7 +60,7 @@ export function PatientCard({ patient, appointments }: PatientCardProps) {
             <div className="space-y-1">
               {upcomingAppointments.slice(0, 2).map((apt) => (
                 <div
-                  key={apt.id}
+                  key={apt.appointmentId}
                   className="text-tiny-mobile sm:text-tiny text-dental-text-secondary bg-dental-light/50 px-2 py-1 rounded"
                 >
                   {new Date(apt.appointmentDateTime).toLocaleDateString()} at {apt.appointmentDateTime}
