@@ -8,15 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientCard } from "@/components/patient-card"
 import { MobileFilterDropdown } from "@/components/mobile-filter-dropdown"
-// import { mockPatients, mockAppointments, mockDentists, mockTreatments } from "@/lib/mock-data"
-// import { dentistsClient } from "@/lib/api/clients/dentistsClient"
 import { Search, Filter, UserPlus, Users, Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
-import { dentistsClient } from "@/lib/api/clients/dentistsClient"
-import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
+import { dentistsClient, Dentist } from "@/lib/api/clients/dentistsClient"
+import { Treatment, treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
-import type { Appointment, Dentist, Patient, Treatment } from "@/lib/types"
+import { Patient, Appointment } from "@/lib/types"
 
 const PATIENTS_PER_PAGE = 6
 

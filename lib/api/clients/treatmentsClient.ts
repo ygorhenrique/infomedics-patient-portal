@@ -1,7 +1,7 @@
 // lib/api/clients/stockClient.ts
 import { apiClient } from './apiClient';
 
-interface Treatment {
+export interface Treatment {
   id: string;
   name: string;
 }

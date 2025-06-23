@@ -11,6 +11,7 @@ interface NewAppointmentRequest {
 
 export interface PatientAppointment {
   readonly status: "scheduled" | "completed" | "cancelled";
+  id: string;
   patientId: string;
   appointmentId: string;
   appointmentDateTime: string;

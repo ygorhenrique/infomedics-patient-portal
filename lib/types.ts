@@ -3,20 +3,13 @@ export interface Patient {
   fullName: string
   address: string
   photo?: string // File object for the uploaded photo
-  createdAt: string
+  createdAtUtc: string
 }
 
 export interface Dentist {
   id: string
   name: string
   specialization: string
-}
-
-export interface Treatment {
-  id: string
-  name: string
-  duration: number // in minutes
-  price: number
 }
 
 export interface Appointment {

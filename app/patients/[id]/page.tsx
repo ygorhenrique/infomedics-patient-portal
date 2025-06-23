@@ -27,12 +27,7 @@ export default function PatientDetailPage() {
   const params = useParams<{ id: string }>()
   const patientId = params.id
 
-  const [data, setData] = useState<PageData>({
-    patient: null,
-    appointments: [],
-    treatments: [],
-    dentists: [],
-  })
+  const [data, setData] = useState<PageData | null>(null) // Initialize as null
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -76,6 +71,9 @@ export default function PatientDetailPage() {
   }, [loadData])
 
   const { upcomingAppointments, pastAppointments } = useMemo(() => {
+    if (!data) {
+      return { upcomingAppointments: [], pastAppointments: [] }
+    }
     const now = new Date()
 
     const upcoming = data.appointments
@@ -87,20 +85,20 @@ export default function PatientDetailPage() {
       .sort((a, b) => new Date(b.appointmentDateTime).getTime() - new Date(a.appointmentDateTime).getTime())
 
     return { upcomingAppointments: upcoming, pastAppointments: past }
-  }, [data.appointments])
+  }, [data])
 
   const getDentistName = useCallback(
     (dentistId: string) => {
-      return data.dentists.find((d) => d.id === dentistId)?.name || "Unknown"
+      return data!.dentists.find((d) => d.id === dentistId)?.name || "Unknown"
     },
-    [data.dentists],
+    [data],
   )
 
   const getTreatmentName = useCallback(
     (treatmentId: string) => {
-      return data.treatments.find((t) => t.id === treatmentId)?.name || "Unknown"
+      return data!.treatments.find((t) => t.id === treatmentId)?.name || "Unknown"
     },
-    [data.treatments],
+    [data],
   )
 
   const getStatusColor = useCallback((status: string) => {
@@ -155,7 +153,7 @@ export default function PatientDetailPage() {
     )
   }
 
-  if (!data.patient) {
+  if (!data || !data.patient) {
     return (
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -223,7 +221,7 @@ export default function PatientDetailPage() {
               <Separator />
               <div className="text-sm text-dental-text-secondary">
                 <span className="font-medium text-dental-dark">Patient since:</span>{" "}
-                {new Date(data.patient.createdAt).toLocaleDateString()}
+                {new Date(data.patient.createdAtUtc).toLocaleDateString()}
               </div>
             </CardContent>
           </Card>

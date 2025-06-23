@@ -2,7 +2,7 @@
 import { Patient } from '@/lib/types';
 import { apiClient } from './apiClient';
 
-export interface NewPatientRequest extends Omit<Omit<Patient, "createdAt">, "id"> {}
+export interface NewPatientRequest extends Omit<Omit<Patient, "createdAtUtc">, "id"> {}
 
 export const patientsClient = {
   async addPatient(patientRequest: NewPatientRequest): Promise<Patient> {

@@ -1,7 +1,7 @@
 // lib/api/clients/stockClient.ts
 import { apiClient } from './apiClient';
 
-interface Dentist {
+export interface Dentist {
   id: string;
   name: string;
 }
