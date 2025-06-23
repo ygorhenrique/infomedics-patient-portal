@@ -45,12 +45,26 @@ export default function PatientDetailPage() {
   }, [params.id])
 
   const upcomingAppointments = patientAppointments
-    .filter((apt) => apt.status === "scheduled" && new Date(apt.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .filter((apt) => {
+      const appointmentDateTime = new Date(`${apt.date}T${apt.time}`)
+      return appointmentDateTime >= new Date()
+    })
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time}`)
+      const dateB = new Date(`${b.date}T${b.time}`)
+      return dateA.getTime() - dateB.getTime()
+    })
 
   const pastAppointments = patientAppointments
-    .filter((apt) => apt.status === "completed" || new Date(apt.date) < new Date())
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .filter((apt) => {
+      const appointmentDateTime = new Date(`${apt.date}T${apt.time}`)
+      return appointmentDateTime < new Date()
+    })
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time}`)
+      const dateB = new Date(`${b.date}T${b.time}`)
+      return dateB.getTime() - dateA.getTime()
+    })
 
   const getDentistName = (dentistId: string) => {
     return mockDentists.find((d) => d.id === dentistId)?.name || "Unknown"
@@ -197,9 +211,6 @@ export default function PatientDetailPage() {
                           <Stethoscope className="h-4 w-4" />
                           <span>{getTreatmentName(appointment.treatmentId)}</span>
                         </div>
-                        {appointment.notes && (
-                          <p className="text-sm text-dental-text-secondary mt-2">{appointment.notes}</p>
-                        )}
                       </div>
                     </div>
                   ))}
@@ -250,9 +261,6 @@ export default function PatientDetailPage() {
                           <Stethoscope className="h-4 w-4" />
                           <span>{getTreatmentName(appointment.treatmentId)}</span>
                         </div>
-                        {appointment.notes && (
-                          <p className="text-sm text-dental-text-secondary mt-2">{appointment.notes}</p>
-                        )}
                       </div>
                     </div>
                   ))}
