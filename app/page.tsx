@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,13 +10,13 @@ import { PatientCard } from "@/components/patient-card"
 import { MobileFilterDropdown } from "@/components/mobile-filter-dropdown"
 // import { mockPatients, mockAppointments, mockDentists, mockTreatments } from "@/lib/mock-data"
 // import { dentistsClient } from "@/lib/api/clients/dentistsClient"
-import { Search, Filter, UserPlus, Users, Calendar, Stethoscope, Clock } from "lucide-react"
+import { Search, Filter, UserPlus, Users, Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
 import { dentistsClient } from "@/lib/api/clients/dentistsClient"
 import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
-import { Appointment, Dentist, Patient, Treatment } from "@/lib/types"
+import type { Appointment, Dentist, Patient, Treatment } from "@/lib/types"
 
 const PATIENTS_PER_PAGE = 6
 
@@ -33,27 +33,17 @@ export default function HomePage() {
   const [treatmentsData, setTreatmentsData] = useState<Treatment[]>([])
 
   const loadData = async () => {
-
     const dentists = await dentistsClient.getAllDentists()
     const appointments = await appointmentsClient.getAllAppointments()
     const treatments = await treatmentsClient.getAllTreatments()
     const patients = await patientsClient.getAllPatients()
-    // This function would typically fetch data from an API
-    // For now, we will use mock data
-    // const patients = await patientsClient.getAllPatients()
-    // const appointments = await appointmentsClient.getAllAppointments()
-    // const dentists = await dentistsClient.getAllDentists()
-    // const treatments = await treatmentsClient.getAllTreatments()
-
-    // For this example, we will use hardcoded mock data
 
     setPatientsData(patients)
     setAppointmentsData(appointments)
-    // setDentistsData(dentists)
-    // setTreatmentsData(treatments)
+    setDentistsData(dentists)
+    setTreatmentsData(treatments)
   }
 
-  
   useEffect(() => {
     loadData()
   }, [])
@@ -88,10 +78,7 @@ export default function HomePage() {
   // }, [searchTerm, filterDate, filterDentist, filterTreatment])
 
   const totalPages = Math.ceil(patientsData.length / PATIENTS_PER_PAGE)
-  const paginatedPatients = patientsData.slice(
-    (currentPage - 1) * PATIENTS_PER_PAGE,
-    currentPage * PATIENTS_PER_PAGE,
-  )
+  const paginatedPatients = patientsData.slice((currentPage - 1) * PATIENTS_PER_PAGE, currentPage * PATIENTS_PER_PAGE)
 
   const clearFilters = () => {
     setSearchTerm("")
@@ -145,7 +132,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats */}
-       {/*  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
+        {/*  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-gradient-to-br from-dental-warm-100/30 to-white border border-dental-warm-200/50 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
               <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">

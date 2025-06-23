@@ -11,7 +11,7 @@ import { ArrowLeft, UserPlus, Upload, X, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
-import { NewPatientRequest, patientsClient } from "@/lib/api/clients/patientsClient"
+import { type NewPatientRequest, patientsClient } from "@/lib/api/clients/patientsClient"
 
 export function NewPatientForm() {
   const router = useRouter()
@@ -19,17 +19,22 @@ export function NewPatientForm() {
   const [formData, setFormData] = useState<NewPatientRequest>({
     fullName: "",
     address: "",
-    photo: ""//null as File | null,
+    photo: "", //null as File | null,
   })
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    await patientsClient.addPatient(formData)
+    try {
+      const newPatient = await patientsClient.addPatient(formData)
 
-    // Redirect back to patients list
-    router.push("/")
+      // Redirect to the new patient's detail page using the ID from the response
+      router.push(`/patients/${newPatient.id}`)
+    } catch (error) {
+      console.error("Error creating patient:", error)
+      // You might want to show an error toast here
+    }
   }
 
   const handleChange = (field: string, value: string) => {
@@ -39,7 +44,7 @@ export function NewPatientForm() {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setFormData({ ...formData, photo:"" }) //photo: file })
+      setFormData({ ...formData, photo: "" }) //photo: file })
 
       // Create preview URL
       const reader = new FileReader()
@@ -51,7 +56,7 @@ export function NewPatientForm() {
   }
 
   const removePhoto = () => {
-    setFormData({ ...formData, photo: "" })//photo: null })
+    setFormData({ ...formData, photo: "" }) //photo: null })
     setPhotoPreview(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
