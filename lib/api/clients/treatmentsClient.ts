@@ -1,4 +1,4 @@
-import type { Treatment } from "../types/treatments"
+import type { Treatment } from "../../types/treatments"
 import { apiClient } from "./apiClient"
 
 export const treatmentsClient = {

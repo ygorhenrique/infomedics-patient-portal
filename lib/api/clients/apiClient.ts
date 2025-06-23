@@ -1,7 +1,6 @@
 // lib/api/clients/apiClient.ts
 export const apiClient = {
   async get<T>(url: string): Promise<T> {
-    // Get access token from localStorage
     const accessToken = localStorage.getItem("accessToken")
     let headers: { [key: string]: string } = {
       "Content-Type": "application/json",
@@ -21,7 +20,6 @@ export const apiClient = {
   },
 
   async post<T, U>(url: string, data: U): Promise<T> {
-    // Get access token from localStorage
     const accessToken = localStorage.getItem("accessToken")
     let headers: { [key: string]: string } = {
       "Content-Type": "application/json",
@@ -42,7 +40,6 @@ export const apiClient = {
   },
 
   async put<T, U>(url: string, data: U): Promise<T> {
-    // Get access token from localStorage
     const accessToken = localStorage.getItem("accessToken")
     let headers: { [key: string]: string } = {
       "Content-Type": "application/json",
@@ -63,7 +60,6 @@ export const apiClient = {
   },
 
   async delete<T>(url: string): Promise<boolean> {
-    // Get access token from localStorage
     const accessToken = localStorage.getItem("accessToken")
     let headers: { [key: string]: string } = {
       "Content-Type": "application/json",

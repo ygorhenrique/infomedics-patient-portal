@@ -12,14 +12,15 @@ import { useParams } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
 import type { Patient } from "@/lib/types"
-import { appointmentsClient, type PatientAppointment } from "@/lib/api/clients/appointmentsClient"
+import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
 import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 import { dentistsClient } from "@/lib/api/clients/dentistsClient"
 import { getPatientPhotoUrl } from "@/lib/utils"
+import { Appointment } from "@/lib/types/index"
 
 interface PageData {
   patient: Patient | null
-  appointments: PatientAppointment[]
+  appointments: Appointment[]
   treatments: { id: string; name: string }[]
   dentists: { id: string; name: string }[]
 }
@@ -268,7 +269,7 @@ export default function PatientDetailPage() {
             {upcomingAppointments.length > 0 ? (
               <div className="space-y-4">
                 {upcomingAppointments.map((appointment) => (
-                  <div key={appointment.appointmentId} className="border border-dental-secondary/30 rounded-lg p-4">
+                  <div key={appointment.id} className="border border-dental-secondary/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
                       <span className="text-sm text-dental-text-secondary">
@@ -316,7 +317,7 @@ export default function PatientDetailPage() {
             {pastAppointments.length > 0 ? (
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {pastAppointments.map((appointment) => (
-                  <div key={appointment.appointmentId} className="border border-dental-secondary/30 rounded-lg p-4">
+                  <div key={appointment.id} className="border border-dental-secondary/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant="outline" className={getStatusColor(appointment.status)}>
                         {appointment.status}

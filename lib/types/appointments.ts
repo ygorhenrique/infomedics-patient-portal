@@ -1,4 +1,5 @@
 export interface Appointment {
+  id: string
   patientId: string
   dentistId: string
   treatmentId: string

@@ -1,4 +1,4 @@
-import type { Appointment, NewAppointmentRequest, PatientAppointment } from "../types/appointments"
+import type { Appointment, NewAppointmentRequest, PatientAppointment } from "../../types/appointments"
 import { apiClient } from "./apiClient"
 
 export const appointmentsClient = {
@@ -14,7 +14,7 @@ export const appointmentsClient = {
     }
   },
 
-  async getAppointmentsByPatientId(patientId: string): Promise<PatientAppointment[]> {
+  async getAppointmentsByPatientId(patientId: string): Promise<Appointment[]> {
     try {
       const url = `http://localhost:5297/appointments/${patientId}`
       const response = await apiClient.get<PatientAppointment[]>(url)

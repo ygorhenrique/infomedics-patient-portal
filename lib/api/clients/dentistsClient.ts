@@ -1,4 +1,4 @@
-import type { Dentist } from "../types/dentists"
+import type { Dentist } from "../../types/dentists"
 import { apiClient } from "./apiClient"
 
 export const dentistsClient = {

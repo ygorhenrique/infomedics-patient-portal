@@ -1,4 +1,4 @@
-import type { Stats } from "../types/stats"
+import type { Stats } from "../../types/stats"
 import { apiClient } from "./apiClient"
 
 export const statsClient = {

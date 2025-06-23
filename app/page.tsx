@@ -8,10 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientCard } from "@/components/patient-card"
 import { UserPlus, Users, Stethoscope, Clock, Calendar, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { appointmentsClient, type PatientAppointment } from "@/lib/api/clients/appointmentsClient"
+import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
-import { type Stats, statsClient } from "@/lib/api/clients/statsClient"
-import type { Patient } from "@/lib/types"
+import {  statsClient } from "@/lib/api/clients/statsClient"
+import { Patient, PatientAppointment, Stats } from "@/lib/types/index"
 
 const PATIENTS_PER_PAGE = 6
 
