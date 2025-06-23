@@ -9,24 +9,24 @@ import { AppointmentForm } from "@/components/appointment-form"
 import { mockPatients, mockAppointments, mockDentists, mockTreatments } from "@/lib/mock-data"
 import { ArrowLeft, User, MapPin, Calendar, Clock, Stethoscope } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, useParams } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
 import { Patient } from "@/lib/types"
 import { appointmentsClient, PatientAppointment } from "@/lib/api/clients/appointmentsClient"
 
-interface PatientDetailPageProps {
-  params: {
-    id: string
-  }
-}
+export default function PatientDetailPage() {
+  const params = useParams<{ id: string }>();
 
-export default function PatientDetailPage({ params }: PatientDetailPageProps) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [patient, setPatient] = useState<Patient | null>(null)
   const [patientAppointments, setPatientAppointments] = useState<PatientAppointment[]>([])
 
   const loadData = async () => {
+
+    if (!params.id) {
+      throw new Error("Patient ID is required")
+    }
 
     const patient = await patientsClient.getPatientById(params.id)
     const patientAppointments = await appointmentsClient.getAppointmentsByPatientId(params.id)
@@ -35,7 +35,7 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
     setPatientAppointments(patientAppointments)
   }
 
-  
+
   useEffect(() => {
     loadData()
   }, [])
