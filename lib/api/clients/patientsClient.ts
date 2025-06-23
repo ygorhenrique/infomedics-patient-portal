@@ -2,10 +2,16 @@
 import type { Patient } from "@/lib/types"
 import { apiClient } from "./apiClient"
 
+export interface PhotoData {
+  base64: string
+  contentType: string
+  fileName: string
+}
+
 export interface NewPatientRequest {
   fullName: string
   address: string
-  photo: string // Base64 encoded string
+  photo: PhotoData | null // Include content type and metadata
 }
 
 export const patientsClient = {

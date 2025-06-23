@@ -13,14 +13,23 @@ import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 import { type NewPatientRequest, patientsClient } from "@/lib/api/clients/patientsClient"
 
-// Update the handlePhotoChange function to convert the file to Base64
+// Supported image types and max file size
+const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
+
+interface PhotoData {
+  base64: string
+  contentType: string
+  fileName: string
+}
+
 export function NewPatientForm() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState<NewPatientRequest>({
     fullName: "",
     address: "",
-    photo: "",
+    photo: null,
   })
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -75,35 +84,67 @@ export function NewPatientForm() {
     }
   }
 
+  const validateImageFile = (file: File): string | null => {
+    // Check file type
+    if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+      return `Unsupported file type. Please upload: ${SUPPORTED_IMAGE_TYPES.map((type) => type.split("/")[1].toUpperCase()).join(", ")}`
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return `File size too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+    }
+
+    return null
+  }
+
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      try {
-        // Convert file to Base64 string
-        const base64String = await convertFileToBase64(file)
-        setFormData({ ...formData, photo: base64String })
+    if (!file) return
 
-        // Create preview URL
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          setPhotoPreview(e.target?.result as string)
-        }
-        reader.readAsDataURL(file)
-      } catch (error) {
-        console.error("Error processing image:", error)
-        setErrors({ ...errors, photo: "Failed to process image. Please try again." })
+    // Clear previous photo error
+    setErrors({ ...errors, photo: undefined })
+
+    // Validate the file
+    const validationError = validateImageFile(file)
+    if (validationError) {
+      setErrors({ ...errors, photo: validationError })
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
       }
+      return
+    }
+
+    try {
+      // Convert file to Base64 string with content type
+      const photoData = await convertFileToPhotoData(file)
+      setFormData({ ...formData, photo: photoData })
+
+      // Create preview URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setPhotoPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error("Error processing image:", error)
+      setErrors({ ...errors, photo: "Failed to process image. Please try again." })
     }
   }
 
-  const convertFileToBase64 = (file: File): Promise<string> => {
+  const convertFileToPhotoData = (file: File): Promise<PhotoData> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => {
         if (typeof reader.result === "string") {
           // Get the base64 string (remove the data:image/jpeg;base64, part)
           const base64String = reader.result.split(",")[1]
-          resolve(base64String)
+          resolve({
+            base64: base64String,
+            contentType: file.type,
+            fileName: file.name,
+          })
         } else {
           reject(new Error("Failed to convert file to Base64"))
         }
@@ -114,15 +155,27 @@ export function NewPatientForm() {
   }
 
   const removePhoto = () => {
-    setFormData({ ...formData, photo: "" })
+    setFormData({ ...formData, photo: null })
     setPhotoPreview(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
+    }
+    // Clear photo error if it exists
+    if (errors.photo) {
+      setErrors({ ...errors, photo: undefined })
     }
   }
 
   const triggerFileInput = () => {
     fileInputRef.current?.click()
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
   return (
@@ -187,11 +240,24 @@ export function NewPatientForm() {
                     <Upload className="h-4 w-4" />
                     {photoPreview ? "Change Photo" : "Upload Photo"}
                   </Button>
-                  <p className="text-xs text-dental-text-secondary mt-1">Optional. JPG, PNG or GIF. Max 5MB.</p>
+                  <p className="text-xs text-dental-text-secondary mt-1">
+                    Optional. JPEG, PNG, GIF, or WebP. Max {MAX_FILE_SIZE / (1024 * 1024)}MB.
+                  </p>
+                  {formData.photo && (
+                    <p className="text-xs text-dental-warm mt-1">
+                      {formData.photo.contentType.split("/")[1].toUpperCase()} • {formData.photo.fileName}
+                    </p>
+                  )}
                   {errors.photo && <p className="text-xs text-red-500 mt-1">{errors.photo}</p>}
                 </div>
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={SUPPORTED_IMAGE_TYPES.join(",")}
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
             </div>
 
             {/* Full Name */}
