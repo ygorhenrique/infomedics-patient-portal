@@ -1,0 +1,45 @@
+// lib/api/clients/stockClient.ts
+import { Appointment, Patient } from '@/lib/types';
+import { apiClient } from './apiClient';
+
+interface Dentist {
+  id: string;
+  name: string;
+}
+
+export interface PatientAppointment {
+  readonly appointment: Appointment;
+  readonly patient: Patient;
+  readonly status: "scheduled" | "completed" | "cancelled";
+  date: string;
+  dentistId: string;
+  time: string;
+  treatmentId: string;
+  notes?: string;
+}
+
+export const appointmentsClient = {
+  async getAllAppointments(): Promise<Appointment[]> {
+    try {
+      const url = `http://localhost:5297/appointments`;
+      const response = await apiClient.get<Appointment[]>(url);
+
+      return response;
+    } catch (error) {
+      console.error(`Error fetching all appointments:`, error);
+      throw error;
+    }
+  },
+
+  async getAppointmentsByPatientId(patientId: string): Promise<PatientAppointment[]> {
+    try {
+      const url = `http://localhost:5297/appointments/${patientId}`;
+      const response = await apiClient.get<PatientAppointment[]>(url);
+
+      return response;
+    } catch (error) {
+      console.error(`Error fetching appointments for patient ${patientId}:`, error);
+      throw error;
+    }
+  },
+};

@@ -11,21 +11,22 @@ import { ArrowLeft, UserPlus, Upload, X, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
+import { NewPatientRequest, patientsClient } from "@/lib/api/clients/patientsClient"
 
 export function NewPatientForm() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<NewPatientRequest>({
     fullName: "",
     address: "",
-    photo: null as File | null,
+    photo: ""//null as File | null,
   })
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, this would make an API call with FormData to handle file upload
-    console.log("Creating patient:", formData)
+
+    await patientsClient.addPatient(formData)
 
     // Redirect back to patients list
     router.push("/")
@@ -38,7 +39,7 @@ export function NewPatientForm() {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setFormData({ ...formData, photo: file })
+      setFormData({ ...formData, photo:"" }) //photo: file })
 
       // Create preview URL
       const reader = new FileReader()
@@ -50,7 +51,7 @@ export function NewPatientForm() {
   }
 
   const removePhoto = () => {
-    setFormData({ ...formData, photo: null })
+    setFormData({ ...formData, photo: "" })//photo: null })
     setPhotoPreview(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""

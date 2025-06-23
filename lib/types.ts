@@ -2,7 +2,7 @@ export interface Patient {
   id: string
   fullName: string
   address: string
-  photo?: string // URL or base64 string for the uploaded photo
+  photo?: string // File object for the uploaded photo
   createdAt: string
 }
 
