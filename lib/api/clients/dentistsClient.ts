@@ -1,20 +1,21 @@
-import { baseApiClient } from "./baseApiClient"
-import { API_ENDPOINTS } from "../config"
-import type { Dentist, CreateDentistRequest } from "../types/dentists"
-import type { RequestOptions } from "../types/common"
+// lib/api/clients/stockClient.ts
+import { apiClient } from './apiClient';
 
-export class DentistsClient {
-  async getAll(options?: RequestOptions): Promise<Dentist[]> {
-    return baseApiClient.get<Dentist[]>(API_ENDPOINTS.dentists, options)
-  }
-
-  async getById(id: string, options?: RequestOptions): Promise<Dentist> {
-    return baseApiClient.get<Dentist>(`${API_ENDPOINTS.dentists}/${id}`, options)
-  }
-
-  async create(data: CreateDentistRequest, options?: RequestOptions): Promise<Dentist> {
-    return baseApiClient.post<Dentist, CreateDentistRequest>(API_ENDPOINTS.dentists, data, options)
-  }
+export interface Dentist {
+  id: string;
+  name: string;
 }
 
-export const dentistsClient = new DentistsClient()
+export const dentistsClient = {
+  async getAllDentists(): Promise<Dentist[]> {
+    try {
+      const url = `http://localhost:5297/dentists`;
+      const response = await apiClient.get<Dentist[]>(url);
+
+      return response;
+    } catch (error) {
+      console.error(`Error fetching all dentists:`, error);
+      throw error;
+    }
+  },
+};

@@ -1,37 +1,53 @@
-import { baseApiClient } from "./baseApiClient"
-import { API_ENDPOINTS } from "../config"
-import type { Patient, CreatePatientRequest, UpdatePatientRequest } from "../types/patients"
-import type { RequestOptions } from "../types/common"
+// lib/api/clients/stockClient.ts
+import type { Patient } from "@/lib/types"
+import { apiClient } from "./apiClient"
 
-export class PatientsClient {
-  async getAll(options?: RequestOptions): Promise<Patient[]> {
-    return baseApiClient.get<Patient[]>(API_ENDPOINTS.patients, options)
-  }
-
-  async getById(id: string, options?: RequestOptions): Promise<Patient> {
-    return baseApiClient.get<Patient>(`${API_ENDPOINTS.patients}/${id}`, options)
-  }
-
-  async create(data: CreatePatientRequest, options?: RequestOptions): Promise<Patient> {
-    return baseApiClient.post<Patient, CreatePatientRequest>(API_ENDPOINTS.patients, data, options)
-  }
-
-  async update(data: UpdatePatientRequest, options?: RequestOptions): Promise<Patient> {
-    const { id, ...updateData } = data
-    return baseApiClient.put<Patient, Omit<UpdatePatientRequest, "id">>(
-      `${API_ENDPOINTS.patients}/${id}`,
-      updateData,
-      options,
-    )
-  }
-
-  async delete(id: string, options?: RequestOptions): Promise<void> {
-    return baseApiClient.delete<void>(`${API_ENDPOINTS.patients}/${id}`, options)
-  }
-
-  async search(query: string, options?: RequestOptions): Promise<Patient[]> {
-    return baseApiClient.get<Patient[]>(`${API_ENDPOINTS.patients}/search?q=${encodeURIComponent(query)}`, options)
-  }
+export interface PhotoData {
+  base64: string
+  contentType: string
+  fileName: string
 }
 
-export const patientsClient = new PatientsClient()
+export interface NewPatientRequest {
+  fullName: string
+  address: string
+  photo: PhotoData | null // Include content type and metadata
+}
+
+export const patientsClient = {
+  async addPatient(patientRequest: NewPatientRequest): Promise<Patient> {
+    try {
+      const url = `http://localhost:5297/patients`
+      const response = await apiClient.post<Patient, NewPatientRequest>(url, patientRequest)
+
+      return response
+    } catch (error) {
+      console.error(`Error adding patient ${patientRequest.fullName}:`, error)
+      throw error
+    }
+  },
+
+  async getPatientById(patientId: string): Promise<Patient> {
+    try {
+      const url = `http://localhost:5297/patients/${patientId}`
+      const response = await apiClient.get<Patient>(url)
+
+      return response
+    } catch (error) {
+      console.error(`Error fetching patient ${patientId}:`, error)
+      throw error
+    }
+  },
+
+  async getAllPatients(): Promise<Patient[]> {
+    try {
+      const url = `http://localhost:5297/patients`
+      const response = await apiClient.get<Patient[]>(url)
+
+      return response
+    } catch (error) {
+      console.error(`Error fetching all patients:`, error)
+      throw error
+    }
+  },
+}

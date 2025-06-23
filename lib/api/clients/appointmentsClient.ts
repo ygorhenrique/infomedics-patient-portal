@@ -1,45 +1,64 @@
-import { baseApiClient } from "./baseApiClient"
-import { API_ENDPOINTS } from "../config"
-import type { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest } from "../types/appointments"
-import type { RequestOptions } from "../types/common"
+// lib/api/clients/stockClient.ts
+import { apiClient } from './apiClient';
 
-export class AppointmentsClient {
-  async getAll(options?: RequestOptions): Promise<Appointment[]> {
-    return baseApiClient.get<Appointment[]>(API_ENDPOINTS.appointments, options)
-  }
-
-  async getById(id: string, options?: RequestOptions): Promise<Appointment> {
-    return baseApiClient.get<Appointment>(`${API_ENDPOINTS.appointments}/${id}`, options)
-  }
-
-  async getByPatientId(patientId: string, options?: RequestOptions): Promise<Appointment[]> {
-    return baseApiClient.get<Appointment[]>(`${API_ENDPOINTS.appointments}/patient/${patientId}`, options)
-  }
-
-  async create(data: CreateAppointmentRequest, options?: RequestOptions): Promise<Appointment> {
-    return baseApiClient.post<Appointment, CreateAppointmentRequest>(API_ENDPOINTS.appointments, data, options)
-  }
-
-  async update(data: UpdateAppointmentRequest, options?: RequestOptions): Promise<Appointment> {
-    const { id, ...updateData } = data
-    return baseApiClient.put<Appointment, Omit<UpdateAppointmentRequest, "id">>(
-      `${API_ENDPOINTS.appointments}/${id}`,
-      updateData,
-      options,
-    )
-  }
-
-  async delete(id: string, options?: RequestOptions): Promise<void> {
-    return baseApiClient.delete<void>(`${API_ENDPOINTS.appointments}/${id}`, options)
-  }
-
-  async getUpcoming(options?: RequestOptions): Promise<Appointment[]> {
-    return baseApiClient.get<Appointment[]>(`${API_ENDPOINTS.appointments}/upcoming`, options)
-  }
-
-  async getToday(options?: RequestOptions): Promise<Appointment[]> {
-    return baseApiClient.get<Appointment[]>(`${API_ENDPOINTS.appointments}/today`, options)
-  }
+export interface Appointment {
+  patientId: string
+  dentistId: string
+  treatmentId: string
+  appointmentDateTime: string
+  readonly status: "scheduled" | "completed" | "cancelled";
 }
 
-export const appointmentsClient = new AppointmentsClient()
+interface NewAppointmentRequest {
+  patientId: string;
+  dentistId: string;
+  appointmentDateTime: string;
+  treatmentId: string;
+}
+
+export interface PatientAppointment {
+  readonly status: "scheduled" | "completed" | "cancelled";
+  appointmentId: string;
+  patientId: string;
+  appointmentDateTime: string;
+  dentistId: string;
+  treatmentId: string;
+}
+
+export const appointmentsClient = {
+  async getAllAppointments(): Promise<PatientAppointment[]> {
+    try {
+      const url = `http://localhost:5297/appointments`;
+      const response = await apiClient.get<PatientAppointment[]>(url);
+
+      return response;
+    } catch (error) {
+      console.error(`Error fetching all appointments:`, error);
+      throw error;
+    }
+  },
+
+  async getAppointmentsByPatientId(patientId: string): Promise<PatientAppointment[]> {
+    try {
+      const url = `http://localhost:5297/appointments/${patientId}`;
+      const response = await apiClient.get<PatientAppointment[]>(url);
+
+      return response;
+    } catch (error) {
+      console.error(`Error fetching appointments for patient ${patientId}:`, error);
+      throw error;
+    }
+  },
+
+  async scheduleAppointment(appointmentRequest: NewAppointmentRequest): Promise<Appointment> {
+    try {
+      const url = `http://localhost:5297/appointments`;
+      const response = await apiClient.post<Appointment, NewAppointmentRequest>(url, appointmentRequest);
+
+      return response;
+    } catch (error) {
+      console.error(`Error scheduling appointment:`, error);
+      throw error;
+    }
+  },
+};
