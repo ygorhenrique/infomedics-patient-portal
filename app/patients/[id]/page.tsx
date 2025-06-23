@@ -11,12 +11,11 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
-import type { Patient } from "@/lib/types"
+import type { Appointment, Patient } from "@/lib/types"
 import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
 import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 import { dentistsClient } from "@/lib/api/clients/dentistsClient"
 import { getPatientPhotoUrl } from "@/lib/utils"
-import { Appointment } from "@/lib/types/index"
 
 interface PageData {
   patient: Patient | null
@@ -53,7 +52,7 @@ export default function PatientDetailPage() {
 
       setData({
         patient,
-        appointments,
+        appointments: patient.appointments || [],
         treatments,
         dentists,
       })

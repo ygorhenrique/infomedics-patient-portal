@@ -1,3 +1,5 @@
+import { Appointment } from "../api"
+
 export interface PhotoData {
   base64: string
   contentType: string
@@ -10,6 +12,7 @@ export interface Patient {
   address: string
   photo?: PhotoData | null
   createdAtUtc: string
+  appointments?: Appointment[]
 }
 
 export interface NewPatientRequest {

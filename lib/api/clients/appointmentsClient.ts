@@ -15,7 +15,7 @@ export const appointmentsClient = {
     }
   },
 
-  async getAppointmentsByPatientId(patientId: string): Promise<Appointment[]> {
+  async getAppointmentsByPatientId(patientId: string): Promise<PatientAppointment[]> {
     try {
       const url = buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${patientId}`)
       const response = await apiClient.get<PatientAppointment[]>(url)
