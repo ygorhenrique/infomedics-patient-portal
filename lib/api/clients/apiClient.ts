@@ -34,7 +34,7 @@ export const apiClient = {
       body: JSON.stringify(data),
     })
     if (!response.ok) {
-      console.log(new Error(`HTTP error! Status: ${response.status}`))
+      throw new Error(await response.text())
     }
     return response.json() as Promise<T>
   },
