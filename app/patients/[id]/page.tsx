@@ -42,27 +42,27 @@ export default function PatientDetailPage() {
 
   useEffect(() => {
     loadData()
-  }, [params.id])
+  }, [params.id, refreshKey])
 
   const upcomingAppointments = patientAppointments
     .filter((apt) => {
-      const appointmentDateTime = new Date(`${apt.date}T${apt.time}`)
+      const appointmentDateTime = new Date(apt.appointmentDateTime)
       return appointmentDateTime >= new Date()
     })
     .sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`)
-      const dateB = new Date(`${b.date}T${b.time}`)
+      const dateA = new Date(a.appointmentDateTime)
+      const dateB = new Date(b.appointmentDateTime)
       return dateA.getTime() - dateB.getTime()
     })
 
   const pastAppointments = patientAppointments
     .filter((apt) => {
-      const appointmentDateTime = new Date(`${apt.date}T${apt.time}`)
+      const appointmentDateTime = new Date(apt.appointmentDateTime)
       return appointmentDateTime < new Date()
     })
     .sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`)
-      const dateB = new Date(`${b.date}T${b.time}`)
+      const dateA = new Date(a.appointmentDateTime)
+      const dateB = new Date(b.appointmentDateTime)
       return dateB.getTime() - dateA.getTime()
     })
 
@@ -85,6 +85,17 @@ export default function PatientDetailPage() {
       default:
         return "bg-gray-100 text-gray-800"
     }
+  }
+
+  const formatAppointmentDate = (appointmentDateTime: string) => {
+    return new Date(appointmentDateTime).toLocaleDateString()
+  }
+
+  const formatAppointmentTime = (appointmentDateTime: string) => {
+    return new Date(appointmentDateTime).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (
@@ -195,13 +206,13 @@ export default function PatientDetailPage() {
                       <div className="flex items-center justify-between mb-2">
                         <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
                         <span className="text-sm text-dental-text-secondary">
-                          {new Date(appointment.date).toLocaleDateString()}
+                          {formatAppointmentDate(appointment.appointmentDateTime)}
                         </span>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                           <Clock className="h-4 w-4" />
-                          <span>{appointment.time}</span>
+                          <span>{formatAppointmentTime(appointment.appointmentDateTime)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                           <User className="h-4 w-4" />
@@ -245,13 +256,13 @@ export default function PatientDetailPage() {
                           {appointment.status}
                         </Badge>
                         <span className="text-sm text-dental-text-secondary">
-                          {new Date(appointment.date).toLocaleDateString()}
+                          {formatAppointmentDate(appointment.appointmentDateTime)}
                         </span>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                           <Clock className="h-4 w-4" />
-                          <span>{appointment.time}</span>
+                          <span>{formatAppointmentTime(appointment.appointmentDateTime)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-dental-text-secondary">
                           <User className="h-4 w-4" />
