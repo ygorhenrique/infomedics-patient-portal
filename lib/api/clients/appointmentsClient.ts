@@ -1,10 +1,11 @@
 import type { Appointment, NewAppointmentRequest, PatientAppointment } from "../../types/appointments"
 import { apiClient } from "./apiClient"
+import { buildApiUrl, API_CONFIG } from "../../config/api"
 
 export const appointmentsClient = {
   async getAllAppointments(): Promise<PatientAppointment[]> {
     try {
-      const url = `http://localhost:5297/appointments`
+      const url = buildApiUrl(API_CONFIG.ENDPOINTS.APPOINTMENTS)
       const response = await apiClient.get<PatientAppointment[]>(url)
 
       return response
@@ -16,7 +17,7 @@ export const appointmentsClient = {
 
   async getAppointmentsByPatientId(patientId: string): Promise<Appointment[]> {
     try {
-      const url = `http://localhost:5297/appointments/${patientId}`
+      const url = buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${patientId}`)
       const response = await apiClient.get<PatientAppointment[]>(url)
 
       return response
@@ -28,7 +29,7 @@ export const appointmentsClient = {
 
   async scheduleAppointment(appointmentRequest: NewAppointmentRequest): Promise<Appointment> {
     try {
-      const url = `http://localhost:5297/appointments`
+      const url = buildApiUrl(API_CONFIG.ENDPOINTS.APPOINTMENTS)
       const response = await apiClient.post<Appointment, NewAppointmentRequest>(url, appointmentRequest)
 
       return response

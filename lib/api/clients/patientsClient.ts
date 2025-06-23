@@ -1,10 +1,11 @@
 import type { Patient, NewPatientRequest } from "../../types/patients"
 import { apiClient } from "./apiClient"
+import { buildApiUrl, API_CONFIG } from "../../config/api"
 
 export const patientsClient = {
   async addPatient(patientRequest: NewPatientRequest): Promise<Patient> {
     try {
-      const url = `http://localhost:5297/patients`
+      const url = buildApiUrl(API_CONFIG.ENDPOINTS.PATIENTS)
       const response = await apiClient.post<Patient, NewPatientRequest>(url, patientRequest)
 
       return response
@@ -16,7 +17,7 @@ export const patientsClient = {
 
   async getPatientById(patientId: string): Promise<Patient> {
     try {
-      const url = `http://localhost:5297/patients/${patientId}`
+      const url = buildApiUrl(`${API_CONFIG.ENDPOINTS.PATIENTS}/${patientId}`)
       const response = await apiClient.get<Patient>(url)
 
       return response
@@ -28,7 +29,7 @@ export const patientsClient = {
 
   async getAllPatients(): Promise<Patient[]> {
     try {
-      const url = `http://localhost:5297/patients`
+      const url = buildApiUrl(API_CONFIG.ENDPOINTS.PATIENTS)
       const response = await apiClient.get<Patient[]>(url)
 
       return response
