@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dialog"
 import { mockDentists, mockTreatments } from "@/lib/mock-data"
 import { Calendar, Plus } from "lucide-react"
+import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
+import { toast } from "@/hooks/use-toast"
 
 interface AppointmentFormProps {
   patientId: string
@@ -35,22 +37,50 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
     treatmentId: "",
     notes: "",
   })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, this would make an API call
-    console.log("Creating appointment:", { patientId, ...formData })
+    setIsLoading(true)
 
-    // Reset form and close dialog
-    setFormData({
-      date: "",
-      time: "",
-      dentistId: "",
-      treatmentId: "",
-      notes: "",
-    })
-    setOpen(false)
-    onAppointmentCreated?.()
+    try {
+      // Combine date and time into appointmentDateTime format
+      const appointmentDateTime = `${formData.date}T${formData.time}:00`
+
+      const appointmentRequest = {
+        patientId,
+        dentistId: formData.dentistId,
+        appointmentDateTime,
+        treatmentId: formData.treatmentId,
+      }
+
+      await appointmentsClient.scheduleAppointment(appointmentRequest)
+
+      toast({
+        title: "Success",
+        description: "Appointment scheduled successfully!",
+      })
+
+      // Reset form and close dialog
+      setFormData({
+        date: "",
+        time: "",
+        dentistId: "",
+        treatmentId: "",
+        notes: "",
+      })
+      setOpen(false)
+      onAppointmentCreated?.()
+    } catch (error) {
+      console.error("Error scheduling appointment:", error)
+      toast({
+        title: "Error",
+        description: "Failed to schedule appointment. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -84,6 +114,7 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -97,6 +128,7 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                 className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -108,8 +140,9 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
             <Select
               value={formData.dentistId}
               onValueChange={(value) => setFormData({ ...formData, dentistId: value })}
+              disabled={isLoading}
             >
-              <SelectTrigger>
+              <SelectTrigger disabled={isLoading}>
                 <SelectValue placeholder="Select a dentist" />
               </SelectTrigger>
               <SelectContent>
@@ -129,8 +162,9 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
             <Select
               value={formData.treatmentId}
               onValueChange={(value) => setFormData({ ...formData, treatmentId: value })}
+              disabled={isLoading}
             >
-              <SelectTrigger>
+              <SelectTrigger disabled={isLoading}>
                 <SelectValue placeholder="Select a treatment" />
               </SelectTrigger>
               <SelectContent>
@@ -154,6 +188,7 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
               rows={3}
+              disabled={isLoading}
             />
           </div>
 
@@ -161,8 +196,8 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
             <Button type="button" variant="outline" onClick={() => setOpen(false)} className="dental-button-secondary">
               Cancel
             </Button>
-            <Button type="submit" className="dental-button-warm-bright">
-              Schedule Appointment
+            <Button type="submit" className="dental-button-warm-bright" disabled={isLoading}>
+              {isLoading ? "Scheduling..." : "Schedule Appointment"}
             </Button>
           </DialogFooter>
         </form>
