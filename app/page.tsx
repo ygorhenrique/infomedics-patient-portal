@@ -24,12 +24,12 @@ export default function HomePage() {
   const filteredPatients = useMemo(() => {
     let filtered = mockPatients
 
-    // Search by name or email
+    // Search by name or address
     if (searchTerm) {
       filtered = filtered.filter(
         (patient) =>
-          `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patient.email.toLowerCase().includes(searchTerm.toLowerCase()),
+          patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          patient.address.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
 
@@ -184,14 +184,14 @@ export default function HomePage() {
               Search & Filter
             </CardTitle>
             <CardDescription className="text-small-mobile sm:text-small text-dental-text-secondary mt-mobile-text-gap sm:mt-1">
-              Find patients by name, email, or filter by appointment details
+              Find patients by name, address, or filter by appointment details
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-4 sm:p-6">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-dental-warm" />
               <Input
-                placeholder="Search by patient name or email..."
+                placeholder="Search by patient name or address..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-1 h-10 text-body-mobile sm:text-base border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"

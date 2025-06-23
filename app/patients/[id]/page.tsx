@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { AppointmentForm } from "@/components/appointment-form"
 import { mockPatients, mockAppointments, mockDentists, mockTreatments } from "@/lib/mock-data"
-import { ArrowLeft, User, Mail, Phone, MapPin, Contact, Calendar, Clock, Stethoscope } from "lucide-react"
+import { ArrowLeft, User, MapPin, Calendar, Clock, Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
@@ -78,15 +78,27 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
         <div className="lg:col-span-2">
           <Card className="dental-card">
             <CardHeader className="bg-dental-light/50 rounded-t-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl flex items-center gap-2 text-dental-dark">
-                    <User className="h-6 w-6 dental-icon-warm" />
-                    {patient.firstName} {patient.lastName}
-                  </CardTitle>
-                  <CardDescription className="text-small text-dental-text-secondary">
-                    Patient ID: {patient.id}
-                  </CardDescription>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-1">
+                  {patient.photo ? (
+                    <img
+                      src={patient.photo || "/placeholder.svg"}
+                      alt={patient.fullName}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-dental-secondary"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-dental-light border-2 border-dental-secondary flex items-center justify-center">
+                      <User className="h-8 w-8 text-dental-text-secondary" />
+                    </div>
+                  )}
+                  <div>
+                    <CardTitle className="text-2xl flex items-center gap-2 text-dental-dark">
+                      {patient.fullName}
+                    </CardTitle>
+                    <CardDescription className="text-small text-dental-text-secondary">
+                      Patient ID: {patient.id}
+                    </CardDescription>
+                  </div>
                 </div>
                 <Badge variant="outline" className="bg-dental-warm-100 text-dental-warm-700 border-dental-warm-200">
                   Active Patient
@@ -94,47 +106,17 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-dental-text-secondary" />
-                  <div>
-                    <p className="text-sm font-medium text-dental-dark">Email</p>
-                    <p className="text-sm text-dental-text-secondary">{patient.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-dental-text-secondary" />
-                  <div>
-                    <p className="text-sm font-medium text-dental-dark">Phone</p>
-                    <p className="text-sm text-dental-text-secondary">{patient.phone}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-dental-text-secondary" />
-                  <div>
-                    <p className="text-sm font-medium text-dental-dark">Date of Birth</p>
-                    <p className="text-sm text-dental-text-secondary">
-                      {new Date(patient.dateOfBirth).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Contact className="h-4 w-4 text-dental-text-secondary" />
-                  <div>
-                    <p className="text-sm font-medium text-dental-dark">Emergency Contact</p>
-                    <p className="text-sm text-dental-text-secondary">
-                      {patient.emergencyContact} - {patient.emergencyPhone}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <Separator />
               <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-dental-text-secondary mt-0.5" />
+                <MapPin className="h-5 w-5 text-dental-text-secondary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-dental-dark">Address</p>
                   <p className="text-sm text-dental-text-secondary">{patient.address}</p>
                 </div>
+              </div>
+              <Separator />
+              <div className="text-sm text-dental-text-secondary">
+                <span className="font-medium text-dental-dark">Patient since:</span>{" "}
+                {new Date(patient.createdAt).toLocaleDateString()}
               </div>
             </CardContent>
           </Card>
@@ -148,7 +130,7 @@ export default function PatientDetailPage({ params }: PatientDetailPageProps) {
             <CardContent className="space-y-3 pt-6">
               <AppointmentForm
                 patientId={patient.id}
-                patientName={`${patient.firstName} ${patient.lastName}`}
+                patientName={patient.fullName}
                 onAppointmentCreated={() => setRefreshKey((prev) => prev + 1)}
               />
               <Button variant="outline" className="dental-button-secondary w-full">

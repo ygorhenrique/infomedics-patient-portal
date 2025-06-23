@@ -56,7 +56,7 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="dental-button-warm-bright gap-2">
+        <Button className="dental-button-warm-bright gap-2 w-full">
           <Plus className="h-4 w-4" />
           Schedule Appointment
         </Button>

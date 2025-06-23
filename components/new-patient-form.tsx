@@ -1,33 +1,30 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, UserPlus } from "lucide-react"
+import { ArrowLeft, UserPlus, Upload, X, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 
 export function NewPatientForm() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    dateOfBirth: "",
+    fullName: "",
     address: "",
-    emergencyContact: "",
-    emergencyPhone: "",
+    photo: null as File | null,
   })
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, this would make an API call
+    // In a real app, this would make an API call with FormData to handle file upload
     console.log("Creating patient:", formData)
 
     // Redirect back to patients list
@@ -36,6 +33,32 @@ export function NewPatientForm() {
 
   const handleChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value })
+  }
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setFormData({ ...formData, photo: file })
+
+      // Create preview URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setPhotoPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removePhoto = () => {
+    setFormData({ ...formData, photo: null })
+    setPhotoPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click()
   }
 
   return (
@@ -59,120 +82,82 @@ export function NewPatientForm() {
             Add New Patient
           </CardTitle>
           <CardDescription className="text-small text-dental-text-secondary">
-            Enter the patient's information to create a new record
+            Enter the patient's basic information to create a new record
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-small font-medium text-dental-dark">
-                  First Name *
-                </Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => handleChange("firstName", e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                  required
-                />
+            {/* Photo Upload Section */}
+            <div className="space-y-4">
+              <Label className="text-small font-medium text-dental-dark">Patient Photo</Label>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  {photoPreview ? (
+                    <div className="relative">
+                      <img
+                        src={photoPreview || "/placeholder.svg"}
+                        alt="Patient preview"
+                        className="w-20 h-20 rounded-full object-cover border-2 border-dental-secondary"
+                      />
+                      <button
+                        type="button"
+                        onClick={removePhoto}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-dental-light border-2 border-dashed border-dental-secondary flex items-center justify-center">
+                      <User className="h-8 w-8 text-dental-text-secondary" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={triggerFileInput}
+                    className="dental-button-secondary gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {photoPreview ? "Change Photo" : "Upload Photo"}
+                  </Button>
+                  <p className="text-xs text-dental-text-secondary mt-1">Optional. JPG, PNG or GIF. Max 5MB.</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-small font-medium text-dental-dark">
-                  Last Name *
-                </Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => handleChange("lastName", e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                  required
-                />
-              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-small font-medium text-dental-dark">
-                  Email *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-small font-medium text-dental-dark">
-                  Phone *
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                  required
-                />
-              </div>
-            </div>
-
+            {/* Full Name */}
             <div className="space-y-2">
-              <Label htmlFor="dateOfBirth" className="text-small font-medium text-dental-dark">
-                Date of Birth *
+              <Label htmlFor="fullName" className="text-small font-medium text-dental-dark">
+                Full Name *
               </Label>
               <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                id="fullName"
+                value={formData.fullName}
+                onChange={(e) => handleChange("fullName", e.target.value)}
+                placeholder="Enter patient's full name"
                 className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
                 required
               />
             </div>
 
+            {/* Address */}
             <div className="space-y-2">
               <Label htmlFor="address" className="text-small font-medium text-dental-dark">
                 Address *
               </Label>
-              <Input
+              <Textarea
                 id="address"
                 value={formData.address}
                 onChange={(e) => handleChange("address", e.target.value)}
+                placeholder="Enter patient's full address"
                 className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
+                rows={3}
                 required
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="emergencyContact" className="text-small font-medium text-dental-dark">
-                  Emergency Contact *
-                </Label>
-                <Input
-                  id="emergencyContact"
-                  value={formData.emergencyContact}
-                  onChange={(e) => handleChange("emergencyContact", e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="emergencyPhone" className="text-small font-medium text-dental-dark">
-                  Emergency Phone *
-                </Label>
-                <Input
-                  id="emergencyPhone"
-                  type="tel"
-                  value={formData.emergencyPhone}
-                  onChange={(e) => handleChange("emergencyPhone", e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                  required
-                />
-              </div>
             </div>
 
             <div className="flex gap-4 pt-4">
