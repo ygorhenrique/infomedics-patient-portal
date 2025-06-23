@@ -232,18 +232,12 @@ export default function PatientDetailPage() {
             <CardHeader className="bg-dental-light/50 rounded-t-xl">
               <CardTitle className="text-lg text-dental-dark">Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 pt-6">
+            <CardContent className="pt-6">
               <AppointmentForm
                 patientId={data.patient.id}
                 patientName={data.patient.fullName}
                 onAppointmentCreated={handleAppointmentCreated}
               />
-              <Button variant="outline" className="dental-button-secondary w-full">
-                Edit Patient Info
-              </Button>
-              <Button variant="outline" className="dental-button-secondary w-full">
-                View Medical History
-              </Button>
             </CardContent>
           </Card>
         </div>

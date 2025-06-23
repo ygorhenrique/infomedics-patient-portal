@@ -13,20 +13,48 @@ import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
 import { type NewPatientRequest, patientsClient } from "@/lib/api/clients/patientsClient"
 
+// Update the handlePhotoChange function to convert the file to Base64
 export function NewPatientForm() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState<NewPatientRequest>({
     fullName: "",
     address: "",
-    photo: "", //null as File | null,
+    photo: "",
   })
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState<{
+    fullName?: string
+    address?: string
+    photo?: string
+  }>({})
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Basic validation
+    const newErrors: {
+      fullName?: string
+      address?: string
+      photo?: string
+    } = {}
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required"
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required"
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
     try {
+      setIsSubmitting(true)
       const newPatient = await patientsClient.addPatient(formData)
 
       // Redirect to the new patient's detail page using the ID from the response
@@ -34,29 +62,59 @@ export function NewPatientForm() {
     } catch (error) {
       console.error("Error creating patient:", error)
       // You might want to show an error toast here
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value })
-  }
-
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData({ ...formData, photo: "" }) //photo: file })
-
-      // Create preview URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setPhotoPreview(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+    // Clear error when user types
+    if (errors[field as keyof typeof errors]) {
+      setErrors({ ...errors, [field]: undefined })
     }
   }
 
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      try {
+        // Convert file to Base64 string
+        const base64String = await convertFileToBase64(file)
+        setFormData({ ...formData, photo: base64String })
+
+        // Create preview URL
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          setPhotoPreview(e.target?.result as string)
+        }
+        reader.readAsDataURL(file)
+      } catch (error) {
+        console.error("Error processing image:", error)
+        setErrors({ ...errors, photo: "Failed to process image. Please try again." })
+      }
+    }
+  }
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          // Get the base64 string (remove the data:image/jpeg;base64, part)
+          const base64String = reader.result.split(",")[1]
+          resolve(base64String)
+        } else {
+          reject(new Error("Failed to convert file to Base64"))
+        }
+      }
+      reader.onerror = (error) => reject(error)
+      reader.readAsDataURL(file)
+    })
+  }
+
   const removePhoto = () => {
-    setFormData({ ...formData, photo: "" }) //photo: null })
+    setFormData({ ...formData, photo: "" })
     setPhotoPreview(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
@@ -130,6 +188,7 @@ export function NewPatientForm() {
                     {photoPreview ? "Change Photo" : "Upload Photo"}
                   </Button>
                   <p className="text-xs text-dental-text-secondary mt-1">Optional. JPG, PNG or GIF. Max 5MB.</p>
+                  {errors.photo && <p className="text-xs text-red-500 mt-1">{errors.photo}</p>}
                 </div>
               </div>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
@@ -145,9 +204,10 @@ export function NewPatientForm() {
                 value={formData.fullName}
                 onChange={(e) => handleChange("fullName", e.target.value)}
                 placeholder="Enter patient's full name"
-                className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
+                className={`border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0 ${errors.fullName ? "border-red-500" : ""}`}
                 required
               />
+              {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
             </div>
 
             {/* Address */}
@@ -160,18 +220,26 @@ export function NewPatientForm() {
                 value={formData.address}
                 onChange={(e) => handleChange("address", e.target.value)}
                 placeholder="Enter patient's full address"
-                className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
+                className={`border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0 ${errors.address ? "border-red-500" : ""}`}
                 rows={3}
                 required
               />
+              {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button type="submit" className="dental-button-warm-bright flex-1">
-                Create Patient
+              <Button type="submit" className="dental-button-warm-bright flex-1" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Creating...
+                  </>
+                ) : (
+                  "Create Patient"
+                )}
               </Button>
               <Link href="/">
-                <Button type="button" variant="outline" className="dental-button-secondary">
+                <Button type="button" variant="outline" className="dental-button-secondary" disabled={isSubmitting}>
                   Cancel
                 </Button>
               </Link>
