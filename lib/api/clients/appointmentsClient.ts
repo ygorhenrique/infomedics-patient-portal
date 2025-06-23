@@ -10,14 +10,12 @@ interface NewAppointmentRequest {
 }
 
 export interface PatientAppointment {
-  readonly appointment: Appointment;
-  readonly patient: Patient;
   readonly status: "scheduled" | "completed" | "cancelled";
-  date: string;
+  patientId: string;
+  appointmentId: string;
+  appointmentDateTime: string;
   dentistId: string;
-  time: string;
   treatmentId: string;
-  notes?: string;
 }
 
 export const appointmentsClient = {
