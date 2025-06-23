@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,10 +17,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { mockDentists, mockTreatments } from "@/lib/mock-data"
 import { Calendar, Plus } from "lucide-react"
 import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
 import { toast } from "@/hooks/use-toast"
+import { dentistsClient } from "@/lib/api/clients/dentistsClient"
+import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 
 interface AppointmentFormProps {
   patientId: string
@@ -38,6 +39,41 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
     notes: "",
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [dentists, setDentists] = useState<Array<{ id: string; name: string }>>([])
+  const [treatments, setTreatments] = useState<Array<{ id: string; name: string }>>([])
+  const [isDentistsLoading, setIsDentistsLoading] = useState(false)
+  const [isTreatmentsLoading, setIsTreatmentsLoading] = useState(false)
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsDentistsLoading(true)
+      setIsTreatmentsLoading(true)
+
+      try {
+        const [dentistsData, treatmentsData] = await Promise.all([
+          dentistsClient.getAllDentists(),
+          treatmentsClient.getAllTreatments(),
+        ])
+
+        setDentists(dentistsData)
+        setTreatments(treatmentsData)
+      } catch (error) {
+        console.error("Error loading data:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load dentists and treatments. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsDentistsLoading(false)
+        setIsTreatmentsLoading(false)
+      }
+    }
+
+    if (open) {
+      loadData()
+    }
+  }, [open])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,11 +182,21 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 <SelectValue placeholder="Select a dentist" />
               </SelectTrigger>
               <SelectContent>
-                {mockDentists.map((dentist) => (
-                  <SelectItem key={dentist.id} value={dentist.id}>
-                    {dentist.name} - {dentist.specialization}
+                {isDentistsLoading ? (
+                  <SelectItem value="" disabled>
+                    Loading dentists...
                   </SelectItem>
-                ))}
+                ) : dentists.length === 0 ? (
+                  <SelectItem value="" disabled>
+                    No dentists available
+                  </SelectItem>
+                ) : (
+                  dentists.map((dentist) => (
+                    <SelectItem key={dentist.id} value={dentist.id}>
+                      {dentist.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -168,11 +214,21 @@ export function AppointmentForm({ patientId, patientName, onAppointmentCreated }
                 <SelectValue placeholder="Select a treatment" />
               </SelectTrigger>
               <SelectContent>
-                {mockTreatments.map((treatment) => (
-                  <SelectItem key={treatment.id} value={treatment.id}>
-                    {treatment.name} ({treatment.duration} min) - ${treatment.price}
+                {isTreatmentsLoading ? (
+                  <SelectItem value="" disabled>
+                    Loading treatments...
                   </SelectItem>
-                ))}
+                ) : treatments.length === 0 ? (
+                  <SelectItem value="" disabled>
+                    No treatments available
+                  </SelectItem>
+                ) : (
+                  treatments.map((treatment) => (
+                    <SelectItem key={treatment.id} value={treatment.id}>
+                      {treatment.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
