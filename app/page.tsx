@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,9 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientCard } from "@/components/patient-card"
 import { MobileFilterDropdown } from "@/components/mobile-filter-dropdown"
-import { mockPatients, mockAppointments, mockDentists, mockTreatments } from "@/lib/mock-data"
+// import { mockPatients, mockAppointments, mockDentists, mockTreatments } from "@/lib/mock-data"
+// import { dentistsClient } from "@/lib/api/clients/dentistsClient"
 import { Search, Filter, UserPlus, Users, Calendar, Stethoscope, Clock } from "lucide-react"
 import Link from "next/link"
+import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
+import { dentistsClient } from "@/lib/api/clients/dentistsClient"
+import { treatmentsClient } from "@/lib/api/clients/treatmentsClient"
+import { patientsClient } from "@/lib/api/clients/patientsClient"
+import { Appointment, Dentist, Patient, Treatment } from "@/lib/types"
 
 const PATIENTS_PER_PAGE = 6
 
@@ -21,37 +27,68 @@ export default function HomePage() {
   const [filterTreatment, setFilterTreatment] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
 
-  const filteredPatients = useMemo(() => {
-    let filtered = mockPatients
+  const [patientsData, setPatientsData] = useState<Patient[]>([])
+  const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([])
+  const [dentistsData, setDentistsData] = useState<Dentist[]>([])
+  const [treatmentsData, setTreatmentsData] = useState<Treatment[]>([])
 
-    // Search by name or address
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (patient) =>
-          patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patient.address.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    }
+  const loadData = async () => {
 
-    // Filter by appointment date, dentist, or treatment
-    if (filterDate || filterDentist !== "all" || filterTreatment !== "all") {
-      const relevantAppointments = mockAppointments.filter((apt) => {
-        const matchesDate = !filterDate || apt.date === filterDate
-        const matchesDentist = filterDentist === "all" || apt.dentistId === filterDentist
-        const matchesTreatment = filterTreatment === "all" || apt.treatmentId === filterTreatment
-        return matchesDate && matchesDentist && matchesTreatment
-      })
+    const dentists = await dentistsClient.getAllDentists()
+    const appointments = await appointmentsClient.getAllAppointments()
+    const treatments = await treatmentsClient.getAllTreatments()
+    const patients = await patientsClient.getAllPatients()
+    // This function would typically fetch data from an API
+    // For now, we will use mock data
+    // const patients = await patientsClient.getAllPatients()
+    // const appointments = await appointmentsClient.getAllAppointments()
+    // const dentists = await dentistsClient.getAllDentists()
+    // const treatments = await treatmentsClient.getAllTreatments()
 
-      const patientIdsWithMatchingAppointments = new Set(relevantAppointments.map((apt) => apt.patientId))
+    // For this example, we will use hardcoded mock data
 
-      filtered = filtered.filter((patient) => patientIdsWithMatchingAppointments.has(patient.id))
-    }
+    setPatientsData(patients)
+    setAppointmentsData(appointments)
+    // setDentistsData(dentists)
+    // setTreatmentsData(treatments)
+  }
 
-    return filtered
-  }, [searchTerm, filterDate, filterDentist, filterTreatment])
+  
+  useEffect(() => {
+    loadData()
+  }, [])
 
-  const totalPages = Math.ceil(filteredPatients.length / PATIENTS_PER_PAGE)
-  const paginatedPatients = filteredPatients.slice(
+  // const filteredPatients = useMemo(() => {
+  //   let filtered = patientsData
+
+  //   // Search by name or address
+  //   if (searchTerm) {
+  //     filtered = filtered.filter(
+  //       (patient) =>
+  //         patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //         patient.address.toLowerCase().includes(searchTerm.toLowerCase()),
+  //     )
+  //   }
+
+  //   // Filter by appointment date, dentist, or treatment
+  //   if (filterDate || filterDentist !== "all" || filterTreatment !== "all") {
+  //     const relevantAppointments = appointmentsData.filter((apt) => {
+  //       const matchesDate = !filterDate || apt.date === filterDate
+  //       const matchesDentist = filterDentist === "all" || apt.dentistId === filterDentist
+  //       const matchesTreatment = filterTreatment === "all" || apt.treatmentId === filterTreatment
+  //       return matchesDate && matchesDentist && matchesTreatment
+  //     })
+
+  //     const patientIdsWithMatchingAppointments = new Set(relevantAppointments.map((apt) => apt.patientId))
+
+  //     filtered = filtered.filter((patient) => patientIdsWithMatchingAppointments.has(patient.id))
+  //   }
+
+  //   return filtered
+  // }, [searchTerm, filterDate, filterDentist, filterTreatment])
+
+  const totalPages = Math.ceil(patientsData.length / PATIENTS_PER_PAGE)
+  const paginatedPatients = patientsData.slice(
     (currentPage - 1) * PATIENTS_PER_PAGE,
     currentPage * PATIENTS_PER_PAGE,
   )
@@ -108,7 +145,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
+       {/*  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-gradient-to-br from-dental-warm-100/30 to-white border border-dental-warm-200/50 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
               <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">
@@ -174,7 +211,7 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </div>*/}
 
         {/* Search and Filters */}
         <Card className="dental-card mb-6">
@@ -218,7 +255,7 @@ export default function HomePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All dentists</SelectItem>
-                    {mockDentists.map((dentist) => (
+                    {dentistsData.map((dentist) => (
                       <SelectItem key={dentist.id} value={dentist.id}>
                         {dentist.name}
                       </SelectItem>
@@ -235,7 +272,7 @@ export default function HomePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All treatments</SelectItem>
-                    {mockTreatments.map((treatment) => (
+                    {treatmentsData.map((treatment) => (
                       <SelectItem key={treatment.id} value={treatment.id}>
                         {treatment.name}
                       </SelectItem>
@@ -269,14 +306,14 @@ export default function HomePage() {
         {/* Results */}
         <div className="mb-4 sm:mb-6">
           <p className="text-small-mobile sm:text-sm text-dental-text-secondary">
-            Showing {paginatedPatients.length} of {filteredPatients.length} patients
+            Showing {paginatedPatients.length} of {patientsData.length} patients
           </p>
         </div>
 
         {/* Patient Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {paginatedPatients.map((patient) => (
-            <PatientCard key={patient.id} patient={patient} appointments={mockAppointments} />
+            <PatientCard key={patient.id} patient={patient} appointments={appointmentsData} />
           ))}
         </div>
 
@@ -320,7 +357,7 @@ export default function HomePage() {
         )}
 
         {/* No results */}
-        {filteredPatients.length === 0 && (
+        {patientsData.length === 0 && (
           <div className="text-center py-8 sm:py-12">
             <Users className="h-10 w-10 sm:h-12 sm:w-12 text-dental-text-secondary mx-auto mb-4" />
             <h3 className="text-body-mobile sm:text-lg font-semibold mb-2">No patients found</h3>
