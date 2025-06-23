@@ -11,7 +11,8 @@ import { ArrowLeft, UserPlus, Upload, X, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DentalLogo } from "@/components/dental-logo"
-import { type NewPatientRequest, patientsClient } from "@/lib/api/clients/patientsClient"
+import { patientsClient } from "@/lib/api/clients/patientsClient"
+import { NewPatientRequest } from "@/lib/api"
 
 // Supported image types and max file size
 const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
