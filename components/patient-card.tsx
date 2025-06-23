@@ -1,10 +1,11 @@
-import type { Patient, Appointment } from "@/lib/types"
+import type { Patient } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, User } from "lucide-react"
 import Link from "next/link"
 import { getPatientPhotoUrl } from "@/lib/utils"
+import { Appointment } from "@/lib/api/clients/appointmentsClient"
 
 interface PatientCardProps {
   patient: Patient
@@ -12,6 +13,7 @@ interface PatientCardProps {
 }
 
 export function PatientCard({ patient, appointments }: PatientCardProps) {
+  
   const upcomingAppointments = appointments.filter((apt) => apt.patientId === patient.id && apt.status === "scheduled")
   const photoUrl = getPatientPhotoUrl(patient.photo)
 
@@ -61,7 +63,7 @@ export function PatientCard({ patient, appointments }: PatientCardProps) {
                   key={apt.id}
                   className="text-tiny-mobile sm:text-tiny text-dental-text-secondary bg-dental-light/50 px-2 py-1 rounded"
                 >
-                  {new Date(apt.date).toLocaleDateString()} at {apt.time}
+                  {new Date(apt.appointmentDateTime).toLocaleDateString()} at {apt.appointmentDateTime}
                 </div>
               ))}
               {upcomingAppointments.length > 2 && (

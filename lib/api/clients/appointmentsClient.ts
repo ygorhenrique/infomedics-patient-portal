@@ -1,6 +1,14 @@
 // lib/api/clients/stockClient.ts
-import { Appointment, Patient } from '@/lib/types';
 import { apiClient } from './apiClient';
+
+export interface Appointment {
+  id: string
+  patientId: string
+  dentistId: string
+  treatmentId: string
+  appointmentDateTime: string
+  readonly status: "scheduled" | "completed" | "cancelled";
+}
 
 interface NewAppointmentRequest {
   patientId: string;
@@ -11,9 +19,8 @@ interface NewAppointmentRequest {
 
 export interface PatientAppointment {
   readonly status: "scheduled" | "completed" | "cancelled";
-  id: string;
-  patientId: string;
   appointmentId: string;
+  patientId: string;
   appointmentDateTime: string;
   dentistId: string;
   treatmentId: string;

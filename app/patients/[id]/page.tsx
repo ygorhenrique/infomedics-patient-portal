@@ -268,7 +268,7 @@ export default function PatientDetailPage() {
             {upcomingAppointments.length > 0 ? (
               <div className="space-y-4">
                 {upcomingAppointments.map((appointment) => (
-                  <div key={appointment.id} className="border border-dental-secondary/30 rounded-lg p-4">
+                  <div key={appointment.appointmentId} className="border border-dental-secondary/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
                       <span className="text-sm text-dental-text-secondary">
@@ -316,7 +316,7 @@ export default function PatientDetailPage() {
             {pastAppointments.length > 0 ? (
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {pastAppointments.map((appointment) => (
-                  <div key={appointment.id} className="border border-dental-secondary/30 rounded-lg p-4">
+                  <div key={appointment.appointmentId} className="border border-dental-secondary/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant="outline" className={getStatusColor(appointment.status)}>
                         {appointment.status}

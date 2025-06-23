@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientCard } from "@/components/patient-card"
 import { MobileFilterDropdown } from "@/components/mobile-filter-dropdown"
-import { Search, Filter, UserPlus, Users, Stethoscope } from "lucide-react"
+import { Search, Filter, UserPlus, Users, Stethoscope, Clock, Calendar } from "lucide-react"
 import Link from "next/link"
-import { appointmentsClient } from "@/lib/api/clients/appointmentsClient"
+import { Appointment, appointmentsClient } from "@/lib/api/clients/appointmentsClient"
 import { dentistsClient, Dentist } from "@/lib/api/clients/dentistsClient"
 import { Treatment, treatmentsClient } from "@/lib/api/clients/treatmentsClient"
 import { patientsClient } from "@/lib/api/clients/patientsClient"
-import { Patient, Appointment } from "@/lib/types"
+import { Stats, statsClient } from "@/lib/api/clients/statsClient"
+import { Patient } from "@/lib/types"
 
 const PATIENTS_PER_PAGE = 6
 
@@ -29,51 +30,25 @@ export default function HomePage() {
   const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([])
   const [dentistsData, setDentistsData] = useState<Dentist[]>([])
   const [treatmentsData, setTreatmentsData] = useState<Treatment[]>([])
+  const [statsData, setStatsData] = useState<Stats | null>(null)
 
   const loadData = async () => {
     const dentists = await dentistsClient.getAllDentists()
     const appointments = await appointmentsClient.getAllAppointments()
     const treatments = await treatmentsClient.getAllTreatments()
     const patients = await patientsClient.getAllPatients()
+    const stats = await statsClient.getStats()
 
     setPatientsData(patients)
     setAppointmentsData(appointments)
     setDentistsData(dentists)
     setTreatmentsData(treatments)
+    setStatsData(stats)
   }
 
   useEffect(() => {
     loadData()
   }, [])
-
-  // const filteredPatients = useMemo(() => {
-  //   let filtered = patientsData
-
-  //   // Search by name or address
-  //   if (searchTerm) {
-  //     filtered = filtered.filter(
-  //       (patient) =>
-  //         patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //         patient.address.toLowerCase().includes(searchTerm.toLowerCase()),
-  //     )
-  //   }
-
-  //   // Filter by appointment date, dentist, or treatment
-  //   if (filterDate || filterDentist !== "all" || filterTreatment !== "all") {
-  //     const relevantAppointments = appointmentsData.filter((apt) => {
-  //       const matchesDate = !filterDate || apt.date === filterDate
-  //       const matchesDentist = filterDentist === "all" || apt.dentistId === filterDentist
-  //       const matchesTreatment = filterTreatment === "all" || apt.treatmentId === filterTreatment
-  //       return matchesDate && matchesDentist && matchesTreatment
-  //     })
-
-  //     const patientIdsWithMatchingAppointments = new Set(relevantAppointments.map((apt) => apt.patientId))
-
-  //     filtered = filtered.filter((patient) => patientIdsWithMatchingAppointments.has(patient.id))
-  //   }
-
-  //   return filtered
-  // }, [searchTerm, filterDate, filterDentist, filterTreatment])
 
   const totalPages = Math.ceil(patientsData.length / PATIENTS_PER_PAGE)
   const paginatedPatients = patientsData.slice((currentPage - 1) * PATIENTS_PER_PAGE, currentPage * PATIENTS_PER_PAGE)
@@ -130,7 +105,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats */}
-        {/*  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-mobile-card-gap sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-gradient-to-br from-dental-warm-100/30 to-white border border-dental-warm-200/50 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-2 sm:mb-0 sm:pb-2">
               <CardTitle className="text-small-mobile sm:text-small font-semibold text-dental-dark">
@@ -139,10 +114,9 @@ export default function HomePage() {
               <Users className="h-4 w-4 sm:h-5 sm:w-5 text-dental-warm" />
             </CardHeader>
             <CardContent className="p-0">
-              <div className="text-2xl sm:text-3xl font-bold text-dental-warm">{mockPatients.length}</div>
-              <p className="text-tiny-mobile sm:text-tiny text-dental-text-secondary mt-mobile-text-gap sm:mt-1">
-                Active in system
-              </p>
+              <div className="text-2xl sm:text-3xl font-bold text-dental-warm">
+                {statsData?.totalPatients || 0}
+              </div>
             </CardContent>
           </Card>
           <Card className="dental-stats-card p-4 sm:p-6">
@@ -154,11 +128,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="text-2xl sm:text-3xl font-bold text-dental-primary">
-                {mockAppointments.filter((apt) => apt.status === "scheduled").length}
+                {statsData?.totalUpcomingAppointments || 0}
               </div>
-              <p className="text-tiny-mobile sm:text-tiny text-dental-text-secondary mt-mobile-text-gap sm:mt-1">
-                Upcoming visits
-              </p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-[#A3BFFA]/30 to-white border border-[#A3BFFA]/50 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-200">
@@ -170,16 +141,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="text-2xl sm:text-3xl font-bold text-[#4A4A4A]">
-                {
-                  mockAppointments.filter((apt) => {
-                    const today = new Date().toISOString().split("T")[0]
-                    return apt.date === today && apt.status === "scheduled"
-                  }).length
-                }
+                {statsData?.totalAppointmentsToday || 0}
               </div>
-              <p className="text-tiny-mobile sm:text-tiny text-[#4A4A4A]/70 mt-mobile-text-gap sm:mt-1">
-                Appointments today
-              </p>
             </CardContent>
           </Card>
           <Card className="dental-stats-card p-4 sm:p-6">
@@ -190,103 +153,12 @@ export default function HomePage() {
               <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-dental-accent" />
             </CardHeader>
             <CardContent className="p-0">
-              <div className="text-2xl sm:text-3xl font-bold text-dental-primary">{mockDentists.length}</div>
-              <p className="text-tiny-mobile sm:text-tiny text-dental-text-secondary mt-mobile-text-gap sm:mt-1">
-                Available practitioners
-              </p>
+              <div className="text-2xl sm:text-3xl font-bold text-dental-primary">
+                {statsData?.totalDentists || 0}
+              </div>
             </CardContent>
           </Card>
-        </div>*/}
-
-        {/* Search and Filters */}
-        <Card className="dental-card mb-6">
-          <CardHeader className="bg-dental-light/50 rounded-t-xl p-4 sm:p-6">
-            <CardTitle className="flex items-center gap-2 text-dental-dark text-body-mobile sm:text-lg">
-              <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-dental-warm" />
-              Search & Filter
-            </CardTitle>
-            <CardDescription className="text-small-mobile sm:text-small text-dental-text-secondary mt-mobile-text-gap sm:mt-1">
-              Find patients by name, address, or filter by appointment details
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 p-4 sm:p-6">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-dental-warm" />
-              <Input
-                placeholder="Search by patient name or address..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 h-10 text-body-mobile sm:text-base border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-              />
-            </div>
-
-            {/* Desktop Filters */}
-            <div className="hidden md:grid grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label className="text-small font-medium text-dental-dark">Appointment Date</Label>
-                <Input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-small font-medium text-dental-dark">Dentist</Label>
-                <Select value={filterDentist} onValueChange={setFilterDentist}>
-                  <SelectTrigger className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0">
-                    <SelectValue placeholder="All dentists" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All dentists</SelectItem>
-                    {dentistsData.map((dentist) => (
-                      <SelectItem key={dentist.id} value={dentist.id}>
-                        {dentist.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-small font-medium text-dental-dark">Treatment</Label>
-                <Select value={filterTreatment} onValueChange={setFilterTreatment}>
-                  <SelectTrigger className="border-dental-secondary/50 focus:border-dental-warm focus:ring-2 focus:ring-dental-warm/20 focus:ring-offset-0">
-                    <SelectValue placeholder="All treatments" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All treatments</SelectItem>
-                    {treatmentsData.map((treatment) => (
-                      <SelectItem key={treatment.id} value={treatment.id}>
-                        {treatment.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-end">
-                <Button variant="outline" onClick={clearFilters} className="dental-button-secondary w-full">
-                  Clear Filters
-                </Button>
-              </div>
-            </div>
-
-            {/* Mobile Filters */}
-            <div className="md:hidden">
-              <MobileFilterDropdown
-                filterDate={filterDate}
-                setFilterDate={setFilterDate}
-                filterDentist={filterDentist}
-                setFilterDentist={setFilterDentist}
-                filterTreatment={filterTreatment}
-                setFilterTreatment={setFilterTreatment}
-                clearFilters={clearFilters}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        </div>
 
         {/* Results */}
         <div className="mb-4 sm:mb-6">
