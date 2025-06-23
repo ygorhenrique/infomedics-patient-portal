@@ -3,10 +3,10 @@ const getApiBaseUrl = (): string => {
   // Check for environment variable first
   if (typeof window !== "undefined") {
     // Client-side: use NEXT_PUBLIC_ prefixed variables
-    return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5297"
+    return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
   } else {
     // Server-side: can use regular environment variables
-    return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5297"
+    return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
   }
 }
 
